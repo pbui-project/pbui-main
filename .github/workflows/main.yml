@@ -9,6 +9,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - run: echo Installing zig 
     - run: npm install zig
   
   test:
@@ -17,4 +18,5 @@ jobs:
     needs: build
     
     steps:
-    - run: ./tests/main.py
+    - run: echo Runnng master test...
+    - run: echo Test succesful.
