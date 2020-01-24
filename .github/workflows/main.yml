@@ -1,0 +1,19 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: echo Installing zig
+    - run: npm install zig
+  
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: echo Testing 
+    - run: ./tests/main.py
