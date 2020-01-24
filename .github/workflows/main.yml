@@ -8,9 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: echo Installing zig
     - uses: actions/checkout@v1
-    - uses: npm install zig
+    - run: npm install zig
   
   test:
     name: Test
@@ -18,5 +17,4 @@ jobs:
     needs: build
     
     steps:
-    - name: echo Testing 
     - run: ./tests/main.py
