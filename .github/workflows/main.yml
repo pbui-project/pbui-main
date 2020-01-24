@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
     - name: echo Installing zig
-    - run: npm install zig
+    - uses: actions/checkout@v1
+    - uses: npm install zig
   
   test:
     name: Test
