@@ -24,12 +24,14 @@ pub fn head(n: u32, path: []const u8) !void {
 
 }
 
+// Testing...  For now here is usage
+// ./head FILE n
 pub fn main() anyerror!void {
     const args = try std.process.argsAlloc(std.heap.page_allocator);
     defer std.process.argsFree(std.heap.page_allocator, args);
 
-    const n = try std.fmt.parseInt(u32, args[1], 10);
+    const n = try std.fmt.parseInt(u32, args[2], 10);
 
-    try head(n, "test");
+    try head(n, args[1]);
 
 }
