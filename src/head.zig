@@ -65,6 +65,7 @@ pub fn main() !void {
         return;
     };
 
+    // run command
     head(n, args[1]) catch |err| {
         try stdout.print("Error: {}\n" , .{err});
         return;
