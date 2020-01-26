@@ -2,7 +2,7 @@ const std  = @import("std");
 const File = std.fs.File;
 const stdout = &std.io.getStdOut().outStream().stream;
 
-const BUFSIZ: u16 = 100;
+const BUFSIZ: u16 = 4096;
 
 // Reads first n lines of file and
 // prints to stdout
