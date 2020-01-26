@@ -53,6 +53,12 @@ pub fn main() !void {
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
+    // check len of args
+    if (args.len != 3) {
+        try stdout.print("usage: ./head FILE n\n", .{});
+        return;
+    }
+
     // must be a number
     const n = std.fmt.parseInt(u32, args[2], 10) catch |err| {
         try stdout.print("Error: second arg must be a number!\n", .{});
