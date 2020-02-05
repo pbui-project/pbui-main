@@ -1,5 +1,5 @@
-const std = @import("std");
-
+// Return 0... wrapped in function in
+// case other debugging stuff needed
 pub fn return_true() anyerror!u8 {
     return 0;
 }
