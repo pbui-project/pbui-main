@@ -40,13 +40,10 @@ pub fn tail(n: u32, path: []const u8) !void {
 // chunks.
 pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
     var buffer: [BUFSIZ]u8 = undefined;
-    var size = stream.readFull(&buffer) catch |err| {
-        return err;
-    };
+    var size = try stream.readFull(&buffer);
+
     // loop until EOF hit
-    while (size > 0) : (size = stream.readFull(&buffer) catch |err| {
-        return err;
-    }) {
+    while (size > 0) : (size = (try stream.readFull(&buffer))) {
         try stdout.print("{}", .{buffer[0..size]});
     }
 }
