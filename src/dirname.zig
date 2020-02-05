@@ -8,10 +8,9 @@ pub fn dirname(paths: [][]const u8, zero: bool) !void {
 
     // loop through paths and call dirname
     var i: usize = 0;
+    var name: ?[]const u8 = null;
     while (i < paths.len) : (i += 1) {
-        var name = std.fs.path.dirname(paths[i]);
-
-        if (name == null) name = ".";
+        name = std.fs.path.dirname(paths[i]) orelse ".";
 
         try stdout.print("{}{c}", .{ name, terminator });
     }
