@@ -1,10 +1,20 @@
 const std = @import("std");
 const stdout = &std.io.getStdOut().outStream().stream;
 
-pub fn basename(path: []const u8) !void {
+// TODO deal with suffix parsing and stuff with arguments
+pub fn basename(paths: [][]const u8, zero: bool, no_suffix: bool) !void {
     // basename calls basenameposix if not windows... more robust
     // to just use basename
-    try stdout.print("{}\n", .{std.fs.path.basename(path)});
+    const terminator: u8 = if (zero) '\x00' else '\n';
+    // loop through paths and call dirname
+    var i: usize = 0;
+    while (i < paths.len) : (i += 1) {
+        var name = std.fs.path.basename(paths[i]);
+
+        // TODO suffix handling
+
+        try stdout.print("{}{c}", .{ name, terminator });
+    }
 }
 
 pub fn main() !void {
@@ -22,5 +32,5 @@ pub fn main() !void {
     }
 
     // run command
-    try basename(args[1]);
+    try basename(args[1..], false, false);
 }
