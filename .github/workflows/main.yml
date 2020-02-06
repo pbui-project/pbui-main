@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   lint:
+    name:   Linting
     runs-on: ubuntu-latest
     
     steps:
@@ -12,8 +13,9 @@ jobs:
     - run:  zig fmt --check src/*.zig
 
   build:
-    name: Build
+    name:   Zig Build/Test
     runs-on: ubuntu-latest
+    needs:  lint
 
     steps:
     - uses: actions/checkout@v1
@@ -21,7 +23,7 @@ jobs:
     - run:  zig build test
   
   test:
-    name: Test
+    name: Python Test Suite
     runs-on: ubuntu-latest
     needs: build
     
