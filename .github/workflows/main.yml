@@ -12,6 +12,7 @@ jobs:
     - run:  zig fmt --check src/*.zig
 
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +21,9 @@ jobs:
     - run:  zig build test
   
   test:
+    name: Test
     runs-on: ubuntu-latest
+    needs: build
     
     steps:
     - uses: actions/checkout@v1
