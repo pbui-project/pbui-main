@@ -23,5 +23,5 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - run:  echo Running Python test suite...
+    - run:  echo Running additional Python test suite...
     - run:  ./tests/main.py
