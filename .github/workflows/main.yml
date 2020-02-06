@@ -9,19 +9,18 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: goto-bus-stop/setup-zig@v1.0.0
-    - run:  echo Adding zig compiler utilities to Github Action
-    - run:  zig fmt --check src/*/*.zig
+    - run:  npm install zig
+    - run:  zig fmt --check src/*.zig
 
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - run:  echo Building...
+    - uses: goto-bus-stop/setup-zig@v1.0.0
     - run:  zig build test
   
   test:
     runs-on: ubuntu-latest
     
     steps:
-    - run:  echo Running additional Python test suite...
-    - run:  ./tests/main.py
+    - run:  tests/main.py
