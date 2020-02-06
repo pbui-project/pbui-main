@@ -3,14 +3,22 @@ name: CI
 on: [push]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - uses: goto-bus-stop/setup-zig@v1.0.0
+    - run:  zig fmt --check src/*.zig
+
   build:
     name: Build
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
-    - run: echo Installing zig 
-    - run: npm install zig
+    - uses: goto-bus-stop/setup-zig@v1.0.0
+    - run:  zig build test
   
   test:
     name: Test
@@ -18,5 +26,5 @@ jobs:
     needs: build
     
     steps:
-    - run: echo Runnng master test...
-    - run: echo Test succesful.
+    - uses: actions/checkout@v1
+    - run:  ./tests/main.py
