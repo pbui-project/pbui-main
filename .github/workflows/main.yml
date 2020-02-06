@@ -8,20 +8,20 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - run:  echo Adding zig compiler utilities to Github Action
     - uses: goto-bus-stop/setup-zig@v1.0.0
+    - run:  echo Adding zig compiler utilities to Github Action
     - run:  zig fmt --check src/*/*.zig
 
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - run:  Building...
+    - run:  echo Building...
     - run:  zig build test
   
   test:
     runs-on: ubuntu-latest
     
     steps:
-    - name: echo Testing 
-    - run: ./tests/main.py
+    - run:  echo Running Python test suite...
+    - run:  ./tests/main.py
