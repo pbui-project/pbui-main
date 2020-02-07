@@ -52,5 +52,5 @@ filibuster will hold the debate still until the filibusterer does one of the fol
 
 - Breaks the above CoC
 
-- Is overruled by a majority of organization members. However, in the event of a tie amongst the organization members @pbui will summoned to weigh in on a binding decision.
+- Is overruled by a majority of organization members. However, in the event of a tie amongst the organization members, @pbui will summoned to weigh in on a **binding** decision.
 
