@@ -43,14 +43,34 @@ If you think the tangent is an important and pertinent issue, please bring it up
 By making an effort to follow these guidelines, we will encourage more contribution to our projects, and our discussions will be friendlier and reach conclusions more easily.
 
 
-## Appendix A (2020/02/06)
+## Appendix A: Debate Procedures (2020/02/06)
+
+### Section 1: Filibuster 
 
 In a formal debate, a member may choose to not yield their time. In doing so, they can _formally_ declare a filibuster. This 
 filibuster will hold the debate still until the filibusterer does one of the following:
 
 - Yields their time
 
+- Achieves 14 hours of filibuster
+
 - Breaks the above CoC
 
-- Is overruled by a majority of organization members. However, in the event of a tie amongst the organization members, @pbui will summoned to weigh in on a **binding** decision.
+- Is overruled by a majority or quorum (Appendix A, Section 2) of organization members. However, in the event of a tie amongst 
+the organization members, procedings will halt until @pbui is summoned and arrives to weigh in on a **binding** decision. 
 
+
+### Section 2: Quorum
+
+Quorum will be defined as wherever the most organization members are at the same time. This grants operating privelage equal 
+to that of general majority.
+In the event of a tie, the closest congregation to Fitzpatrick Hall will have supermajority. However, quorum is not 
+immediately granted. The following criteria must be met to achieve quorum:
+
+- Notification of meeting at least 4 hours in advance to all members through github, email, or irc
+
+- No standing filibusters must be in place
+
+- Must be meeting in the same room, granted the room is _not_ a gymnasium
+
+- Members must all be wearing at least casual attire (business casual preferred)
