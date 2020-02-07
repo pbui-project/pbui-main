@@ -44,12 +44,14 @@ By making an effort to follow these guidelines, we will encourage more contribut
 
 ## Instruments of Good Works
 
-The founder of SQLite, and all of the current developers at the time when this document was composed, have pledged to govern their interactions with each other, with their clients, and with the larger SQLite user community in accordance with the "instruments of good works" from chapter 4 of The Rule of St. Benedict (hereafter: "The Rule"). This code of ethics has proven its mettle in thousands of diverse communities for over 1,500 years, and has served as a baseline for many civil law codes since the time of Charlemagne.
+The founder of PBUI project, and all of the current developers at the time when this document was composed, have pledged to govern their interactions with each other, with their clients, and with the larger SQLite user community in accordance with the "instruments of good works" from chapter 4 of The Rule of St. Benedict (hereafter: "The Rule"). This code of ethics has proven its mettle in thousands of diverse communities for over 1,500 years, and has served as a baseline for many civil law codes since the time of Charlemagne.
+
 ## Scope of Application
 
 No one is required to follow The Rule, to know The Rule, or even to think that The Rule is a good idea. The Founder of SQLite believes that anyone who follows The Rule will live a happier and more productive life, but individuals are free to dispute or ignore that advice if they wish.
 
-The founder of SQLite and all current developers have pledged to follow spirit of The Rule to the best of their ability. They view The Rule as their promise to all SQLite users of how the developers are expected to behave in community. This is a one-way promise, or covenant. In other words, the developers are saying: "We will treat you this way regardless of how you treat us."
+The founder of PBUI project and all current developers have pledged to follow spirit of The Rule to the best of their ability. They view The Rule as their promise to all SQLite users of how the developers are expected to behave in community. This is a one-way promise, or covenant. In other words, the developers are saying: "We will treat you this way regardless of how you treat us."
+
 ## The Rule
 
 1. First of all, love the Lord God with your whole heart, your whole soul, and your whole strength.
