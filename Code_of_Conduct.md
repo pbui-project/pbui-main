@@ -43,3 +43,14 @@ If you think the tangent is an important and pertinent issue, please bring it up
 By making an effort to follow these guidelines, we will encourage more contribution to our projects, and our discussions will be friendlier and reach conclusions more easily.
 
 
+## Appendix A
+
+In a formal debate, a member may choose to not yield their time. In doing so, they can _formally_ declare a filibuster. This 
+filibuster will hold the debate still until the filibusterer does one of the following:
+
+- Yields their time
+
+- Breaks the above CoC
+
+- Is overruled by a majority of organization members
+
