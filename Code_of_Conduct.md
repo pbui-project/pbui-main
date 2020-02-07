@@ -163,3 +163,16 @@ immediately granted. The following criteria must be met to achieve quorum:
 - Must be meeting in the same room, granted the room is _not_ a gymnasium
 
 - Members must all be wearing at least casual attire (business casual preferred)
+
+## Appendix B: Updating the Code of Conduct (2020/02/06)
+
+Should events transpire necessitating a change to the code of conduct, the code of conduct may be changed as long as the following criteria are met:
+
+- Changes do not contradict the teachings of our Savior, Jesus Christ
+
+- Changes must be approved by a two-thirds majority of all members, in the same room, granted that the room is _not_ a gymnasium
+
+- Changes can be approved in a gymnasium granted that half of all members are wearing basketball jerseys. 
+
+- Changes can be approved by a simple majority granted that all members are present in the office of @pbui.
+
