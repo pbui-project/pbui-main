@@ -42,7 +42,7 @@ If you think the tangent is an important and pertinent issue, please bring it up
 
 By making an effort to follow these guidelines, we will encourage more contribution to our projects, and our discussions will be friendlier and reach conclusions more easily.
 
-# The God Clause (2020/02/06)
+# The God Clause (The sixth day of February,the year of our Lord two thouand and twenty)
 
 In recognition that the above Code of Conduct did not fully encompass the values of our project, the following Code of Conduct was appended to ensure that development was carried out in a morally sound fashion. 
 
@@ -172,7 +172,7 @@ Should events transpire necessitating a change to the code of conduct, the code 
 
 - Changes must be approved by a two-thirds majority of all members, in the same room, granted that the room is _not_ a gymnasium
 
-- Changes can be approved in a gymnasium granted that half of all members are wearing basketball jerseys. 
+- Changes can be approved in a gymnasium granted that half of all members are wearing basketball jerseys
 
-- Changes can be approved by a simple majority granted that all members are present in the office of @pbui.
+- Changes can be approved by a simple majority or quorum granted that all members are present in the office of @pbui
 
