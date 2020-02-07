@@ -42,6 +42,10 @@ If you think the tangent is an important and pertinent issue, please bring it up
 
 By making an effort to follow these guidelines, we will encourage more contribution to our projects, and our discussions will be friendlier and reach conclusions more easily.
 
+## The God Clause (2020/02/06)
+
+In recognition that the above Code of Conduct did not fully encompass the values of our project, the following Code of Conduct was appended to ensure that development was carried out in a morally sound fashion. 
+
 ## Instruments of Good Works
 
 The founder of PBUI project, and all of the current developers at the time when this document was composed, have pledged to govern their interactions with each other, with their clients, and with the larger SQLite user community in accordance with the "instruments of good works" from chapter 4 of The Rule of St. Benedict (hereafter: "The Rule"). This code of ethics has proven its mettle in thousands of diverse communities for over 1,500 years, and has served as a baseline for many civil law codes since the time of Charlemagne.
