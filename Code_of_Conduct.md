@@ -42,7 +42,7 @@ If you think the tangent is an important and pertinent issue, please bring it up
 
 By making an effort to follow these guidelines, we will encourage more contribution to our projects, and our discussions will be friendlier and reach conclusions more easily.
 
-# The God Clause (The sixth day of February,the year of our Lord two thouand and twenty)
+# The God Clause (The sixth day of February, the year of our Lord two thouand and twenty)
 
 In recognition that the above Code of Conduct did not fully encompass the values of our project, the following Code of Conduct was appended to ensure that development was carried out in a morally sound fashion. 
 
