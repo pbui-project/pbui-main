@@ -1,4 +1,4 @@
-const std  = @import("std");
+const std = @import("std");
 const File = std.fs.File;
 const stdout = &std.io.getStdOut().outStream().stream;
 
@@ -25,10 +25,14 @@ pub fn head(n: u32, path: []const u8) !void {
     var line_count: u8 = 0;
     var fast: u32 = 0;
     var slow: u32 = 0;
-    
+
     // Read first chunk of stream & loop
     var size = try buffered_stream.stream.readFull(&buffer);
-    while (size > 0) : ({size = (try buffered_stream.stream.readFull(&buffer)); fast = 0; slow = 0;}) {
+    while (size > 0) : ({
+        size = (try buffered_stream.stream.readFull(&buffer));
+        fast = 0;
+        slow = 0;
+    }) {
         // search for \n over characters and dump lines when found
         while (fast < size) : (fast += 1) {
             if (buffer[fast] == '\n') {
@@ -49,7 +53,7 @@ pub fn main() !void {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return;  
+        return;
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
@@ -67,7 +71,7 @@ pub fn main() !void {
 
     // run command
     head(n, args[1]) catch |err| {
-        try stdout.print("Error: {}\n" , .{err});
+        try stdout.print("Error: {}\n", .{err});
         return;
     };
 }
