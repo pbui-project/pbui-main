@@ -10,6 +10,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: goto-bus-stop/setup-zig@v1.0.0
+      with:
+        version: master
     - run:  zig fmt --check src/*.zig
 
   build:
@@ -20,6 +22,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: goto-bus-stop/setup-zig@v1.0.0
+      with:
+        version: master
     - run:  zig build test
   
   test:
