@@ -17,17 +17,17 @@ const Allocator = std.mem.Allocator;
 //    assert(false);
 //}
 
-const ArgTypeTag = enum {
+pub const ArgTypeTag = enum {
     String,
     None,
 };
 
-const ArgType = union(ArgTypeTag) {
+pub const ArgType = union(ArgTypeTag) {
     String: ?[]u8,
     None: void,
 };
 
-const Flag = struct {
+pub const Flag = struct {
     // Unique "ID" for flag (use enum)
     name: u16,
     kind: ArgTypeTag = None,
@@ -40,12 +40,12 @@ const Flag = struct {
     long: ?[]const u8,
 };
 
-const FlagValue = struct {
+pub const FlagValue = struct {
     name: u16,
     value: ArgType,
 };
 
-const FlagIterator = struct {
+pub const FlagIterator = struct {
     flags: []Flag,
     argv: [][]u8,
     count: u16 = 1,
