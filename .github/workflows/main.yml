@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v1
     - uses: goto-bus-stop/setup-zig@v1.2.1
       with:
-        version: 0.5.0
+        version: zig-0.5.0+ab4ea5d3c
     - run:  zig fmt --check src/*.zig
 
   build:
@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v1
     - uses: goto-bus-stop/setup-zig@v1.2.1
       with:
-        version: 0.5.0
+        version: zig-0.5.0+ab4ea5d3c
     - run:  zig build test
   
   test:
