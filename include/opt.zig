@@ -4,19 +4,6 @@ const warn = std.debug.warn;
 const ArrayList = std.ArrayList;
 const Allocator = std.mem.Allocator;
 
-// TODO make tests.  Idk how casting from consts works so no tests for now.
-
-//test "args with no defined flags" {
-//    const args = [_][]const u8{
-//        "test", "arg1",  "--flag1", "arg2",
-//        "--",   "-arg3",
-//    };
-//    var flags = [_]Flag{};
-//    var it = FlagIterator.init(flags[0..0], args[0..]);
-//    assert(std.mem.eql(u8, it.next_arg(), "arg1"));
-//    assert(false);
-//}
-
 pub const ArgTypeTag = enum {
     String,
     None,
@@ -33,7 +20,7 @@ pub fn Flag(comptime T: type) type {
         name: T,
         kind: ArgTypeTag = ArgTypeTag.None,
 
-        // Mandatory value ignored if ArgType is bool
+        // ignored if 'kind' is None
         mandatory: bool = false,
 
         // Should be unique within the parsing context
