@@ -1,5 +1,4 @@
 const std = @import("std");
-const File = &std.io.getStdOut().outStream().stream;
 const stdout = &std.io.getStdOut().outStream().stream;
 
 const BUFSIZ: u16 = 4096;
