@@ -3,11 +3,9 @@ const opt = @import("opt.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
 const warn = std.debug.warn;
 
-// TODO deal with suffix parsing and stuff with arguments
 pub fn basename(path: []const u8, terminator: u8, suffix: ?[]u8) !void {
     // basename calls basenameposix if not windows... more robust
     // to just use basename
-    // loop through paths and call dirname
 
     // GNU basename does this.  I wonder if it works the same way on Windows.
     if (path.len == 1 and path[0] == '/') {
