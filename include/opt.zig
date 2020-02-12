@@ -30,14 +30,14 @@ pub const ArgType = union(ArgTypeTag) {
 pub const Flag = struct {
     // Unique "ID" for flag (use enum)
     name: u16,
-    kind: ArgTypeTag = None,
+    kind: ArgTypeTag = ArgTypeTag.None,
 
     // Mandatory value ignored if ArgType is bool
     mandatory: bool = false,
 
     // Should be unique within the parsing context
-    short: ?u8,
-    long: ?[]const u8,
+    short: ?u8 = null,
+    long: ?[]const u8 = null,
 };
 
 pub const FlagValue = struct {
@@ -109,7 +109,7 @@ pub const FlagIterator = struct {
                 self.argcount += 1;
                 continue;
             }
-            // If - or --, look ahead and see if next string is arg
+            // If - or --, look ahead and see if next string is arg of flag
             if (self.check_arg()) {
                 self.argcount += 1;
                 if (self.argcount < self.argv.len) {
@@ -234,19 +234,22 @@ pub const FlagIterator = struct {
         const curr = self.argv[self.argcount];
         // Handle --
         if (curr[1] == '-') {
-            const opt_flag = self.flag_from_long(curr[2..]);
+            var eqindex = curr.len;
+            for (curr) |ch, i| {
+                if (ch == '=') {
+                    eqindex = i;
+                    break;
+                }
+            }
+            const opt_flag = self.flag_from_long(curr[2..eqindex]);
             if (opt_flag) |flag| {
                 // Mandatory flag value means that = in the current string
                 // implies that the next string is NOT its argument
                 if (flag.mandatory) {
-                    for (curr) |ch| {
-                        if (ch == '=')
-                            return true;
-                    }
+                    return eqindex == curr.len;
                 }
-                return flag.kind == ArgType.None;
             }
-            return true;
+            return false;
         }
         // Handle -
         for (curr) |ch, i| {
@@ -257,11 +260,11 @@ pub const FlagIterator = struct {
                 if (flag.kind == ArgType.None) continue;
                 // If last string of the word, depends on whether mandatory
                 if (i == curr.len - 1) {
-                    return !flag.mandatory;
+                    return flag.mandatory;
                 }
                 // If can have an argument and not at end of word,
-                // next string is always bare arg
-                return true;
+                // next arg is bare
+                return false;
             }
         }
         // Unreachable
