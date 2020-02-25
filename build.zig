@@ -2,7 +2,7 @@ const Builder = @import("std").build.Builder;
 
 pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
-    const lib = b.addStaticLibrary("temp", "src/main.zig");
+    const lib = b.addExecutable("pbui", "src/main.zig");
     lib.setBuildMode(mode);
     lib.install();
 
