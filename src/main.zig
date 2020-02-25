@@ -77,7 +77,7 @@ var flags = [_]opt.Flag(mainFlags) {
     },
 };
 
-pub fn usage() !void {
+pub fn usage() void {
     try stdout.print("Usage: ./pbui APPLET [arguments]\n\nApplets list: \n  basename\n  dirname\n  false\n  head\n  ls\n  mkdir\n  rm\n  sleep\n  tail\n  true\n", .{});
 
     return;
@@ -94,7 +94,7 @@ pub fn main() !void {
 
     // Check arg length
     if (args.len < 2) {
-        try usage();
+        usage();
         return;
     }
 
@@ -104,47 +104,47 @@ pub fn main() !void {
     }) |flag| {
         switch (flag.name) {
             mainFlags.Help => {
-                try usage();
+                usage();
             },
             mainFlags.Basename => {
                 warn("Call to basename (missing arguments)\n", .{});
-                try basename.main();
+                return basename.main();
             },
             mainFlags.Dirname => {
                 warn("Call to dirname (missing arguments)\n", .{});
-                try dirname.main();
+                return dirname.main();
             },
             mainFlags.False => {
                 warn("Call to false (missing arguments)\n", .{});
-                try fls.main();
+                return fls.main();
             },
             mainFlags.Head => {
                 warn("Call to head (missing arguments)\n", .{});
-                try head.main();
+                return head.main();
             },
             mainFlags.LS => {
                 warn("Call to ls (missing arguments)\n", .{});
-                try ls.main();
+                return ls.main();
             },
             mainFlags.MKDir => {
                 warn("Call to mkdir (missing arguments)\n", .{});
-                try mkdir.main();
+                return mkdir.main();
             },
             mainFlags.RM => {
                 warn("Call to rm (missing arguments)\n", .{});
-                try rm.main();
+                return rm.main();
             },
             mainFlags.Sleep => {
                 warn("Call to sleep (missing arguments)\n", .{});
-                try sleep.main();
+                return sleep.main();
             },
             mainFlags.Tail => {
                 warn("Call to tail (missing arguments)\n", .{});
-                try tail.main();
+                return tail.main();
             },
             mainFlags.True => {
                 warn("Call to true (missing arguments)\n", .{});
-                try tru.main();
+                return tru.main();
             },
         }
     }
