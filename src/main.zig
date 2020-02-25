@@ -77,37 +77,37 @@ var flags = [_]opt.Flag(mainFlags) {
     },
 };
 
-pub fn usage() void {
+pub fn usage() anyerror!u8 {
     try stdout.print("Usage: ./pbui APPLET [arguments]\n\nApplets list: \n  basename\n  dirname\n  false\n  head\n  ls\n  mkdir\n  rm\n  sleep\n  tail\n  true\n", .{});
 
-    return;
+    return 1;
 }
 
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     // Out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return;
+        return 1;
     };
 
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     // Check arg length
     if (args.len < 2) {
-        usage();
-        return;
+        return usage();
     }
 
     var it = opt.FlagIterator(mainFlags).init(flags[0..], args);
     while (it.next_flag() catch {
-        return;
+        return 1;
     }) |flag| {
         switch (flag.name) {
             mainFlags.Help => {
-                usage();
+                return usage();
             },
             mainFlags.Basename => {
                 warn("Call to basename (missing arguments)\n", .{});
+                //break :blk basename.main();
                 return basename.main();
             },
             mainFlags.Dirname => {
@@ -115,8 +115,7 @@ pub fn main() !void {
                 return dirname.main();
             },
             mainFlags.False => {
-                warn("Call to false (missing arguments)\n", .{});
-                return fls.main();
+                warn("Call to false currently broken\n", .{});
             },
             mainFlags.Head => {
                 warn("Call to head (missing arguments)\n", .{});
@@ -147,7 +146,10 @@ pub fn main() !void {
                 return tru.main();
             },
         }
+        return 1;
     }
+
+    return 1;
 }
 
 test "Test assertion: addition" {
