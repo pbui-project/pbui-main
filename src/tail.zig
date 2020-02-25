@@ -12,9 +12,13 @@ pub fn tail(n: u32, path: []const u8) !void {
     }
 
     // Open file for reading and put into buffered stream
-    const file = try std.fs.File.openRead(path);
+    //const file = try std.fs.File.openRead(path);
+    const file = std.fs.cwd().openFile(path, .{ .read = true }) catch |err| {
+        try stdout.print("Error: cant open file with read: {}\n", .{n});
+        return;
+    };
     defer file.close();
-
+ 
     // get the right start position
     var printPos = find_adjusted_start(n, file) catch |err| {
         try stdout.print("Error: {}\n", .{err});
@@ -89,29 +93,31 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
     return endPos - offset;
 }
 
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return;
+        return 1;
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     // check len of args
     if (args.len != 3) {
         try stdout.print("usage: ./head FILE n\n", .{});
-        return;
+        return 1;
     }
 
     // must be a number
     const n = std.fmt.parseInt(u32, args[2], 10) catch |err| {
         try stdout.print("Error: second arg must be a number!\n", .{});
-        return;
+        return 1;
     };
 
     // run command
     tail(n, args[1]) catch |err| {
         try stdout.print("Error: {}\n", .{err});
-        return;
+        return 1;
     };
+
+    return 0;
 }

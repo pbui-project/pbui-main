@@ -16,19 +16,20 @@ pub fn dirname(paths: [][]const u8, zero: bool) !void {
     }
 }
 
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return;
+        return 1;
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     // check len of args
     if (args.len < 2) {
         try stdout.print("usage: ./dirname FILENAME...\n", .{});
-        return;
+        return 1;
     }
     // run command
     try dirname(args[1..], false);
+    return 0;
 }

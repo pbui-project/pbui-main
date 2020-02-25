@@ -49,29 +49,31 @@ pub fn head(n: u32, path: []const u8) !void {
 
 // Testing...  For now here is usage
 // ./head FILE n
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return;
+        return 1;
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     // check len of args
     if (args.len != 3) {
         try stdout.print("usage: ./head FILE n\n", .{});
-        return;
+        return 1;
     }
 
     // must be a number
     const n = std.fmt.parseInt(u32, args[2], 10) catch |err| {
         try stdout.print("Error: second arg must be a number!\n", .{});
-        return;
+        return 1;
     };
 
     // run command
     head(n, args[1]) catch |err| {
         try stdout.print("Error: {}\n", .{err});
-        return;
+        return 1;
     };
+
+    return 0;
 }

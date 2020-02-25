@@ -9,7 +9,7 @@ pub fn sleep(n: u32) anyerror!void {
     std.os.nanosleep(n, 0);
 }
 
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
