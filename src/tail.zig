@@ -1,7 +1,8 @@
 const std = @import("std");
+const opt = @import("opt.zig");
 const File = &std.io.getStdOut().outStream().stream;
 const stdout = &std.io.getStdOut().outStream().stream;
-
+const warn = std.debug.warn;
 const BUFSIZ: u16 = 4096;
 
 pub fn tail(n: u32, path: []const u8) !void {
@@ -12,7 +13,10 @@ pub fn tail(n: u32, path: []const u8) !void {
     }
 
     // Open file for reading and put into buffered stream
-    const file = try std.fs.File.openRead(path);
+    const file = std.fs.File.openRead(path) catch |err| {
+        try stdout.print("Error: cannot open file {}\n", .{path});
+        return;
+    };
     defer file.close();
 
     // get the right start position
@@ -89,6 +93,43 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
     return endPos - offset;
 }
 
+pub fn str_to_n(str: ?[]u8) anyerror!u32 {
+    return 10;
+    //   return std.mem.readInt()
+}
+
+const TailFlags = enum {
+    Lines,
+    Bytes,
+    Forever,
+    Help,
+    Version,
+};
+
+var flags = [_]opt.Flag(TailFlags){
+    .{
+        .name = TailFlags.Help,
+        .long = "help",
+    },
+    .{
+        .name = TailFlags.Version,
+        .long = "version",
+    },
+    .{
+        .name = TailFlags.Forever,
+        .short = 'f',
+    },
+    .{
+        .name = TailFlags.Bytes,
+        .short = 'c',
+        .kind = opt.ArgTypeTag.String,
+    },
+    .{
+        .name = TailFlags.Lines,
+        .short = 'n',
+    },
+};
+
 pub fn main() !void {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
@@ -97,21 +138,49 @@ pub fn main() !void {
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
-    // check len of args
-    if (args.len != 3) {
-        try stdout.print("usage: ./head FILE n\n", .{});
+    var forever: bool = false;
+    var bytes: bool = false;
+    var length: ?[]u8 = null;
+
+    var it = opt.FlagIterator(TailFlags).init(flags[0..], args);
+    while (it.next_flag() catch {
         return;
+    }) |flag| {
+        switch (flag.name) {
+            TailFlags.Help => {
+                warn("(help screen here)\n", .{});
+                return;
+            },
+            TailFlags.Version => {
+                warn("(version info here)\n", .{});
+                return;
+            },
+            TailFlags.Forever => {
+                forever = true;
+            },
+            TailFlags.Bytes => {
+                bytes = true;
+                length = flag.value.String.?;
+            },
+            TailFlags.Lines => {
+                length = flag.value.String.?;
+            },
+        }
     }
 
-    // must be a number
-    const n = std.fmt.parseInt(u32, args[2], 10) catch |err| {
-        try stdout.print("Error: second arg must be a number!\n", .{});
-        return;
-    };
+    var n = try str_to_n(length);
+
+    // TODO Go in stdin read mode try stdout.print("{}", .{it.argv.len});
+    while (true) {
+        // has to be a const i guess so can't have a nice loop.
+        const file_name = it.next_arg() orelse break;
+        const f_name: []const u8 = file_name;
+        try tail(n, f_name);
+    }
 
     // run command
-    tail(n, args[1]) catch |err| {
-        try stdout.print("Error: {}\n", .{err});
-        return;
-    };
+    //tail(n, args[1]) catch |err| {
+    //   try stdout.print("Error: {}\n", .{err});
+    //   return;
+    //};
 }
