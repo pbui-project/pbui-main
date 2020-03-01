@@ -5,10 +5,10 @@ const stdout = &std.io.getStdOut().outStream().stream;
 const warn = std.debug.warn;
 const BUFSIZ: u16 = 4096;
 
-pub fn tail(n: u32, path: []const u8) !void {
+pub fn tail(n: u32, path: []const u8, is_bytes: bool) !void {
     // check if user inputs illegal line number
     if (n <= 0) {
-        try stdout.print("Error: illegal line count: {}\n", .{n});
+        try stdout.print("Error: illegal count: {}\n", .{n});
         return;
     }
 
@@ -20,7 +20,7 @@ pub fn tail(n: u32, path: []const u8) !void {
     defer file.close();
 
     // get the right start position
-    var printPos = find_adjusted_start(n, file) catch |err| {
+    var printPos = find_adjusted_start(n, file, is_bytes) catch |err| {
         try stdout.print("Error: {}\n", .{err});
         return;
     };
@@ -52,7 +52,7 @@ pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
     }
 }
 
-pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
+pub fn find_adjusted_start(n: u32, file: std.fs.File, is_bytes: bool) anyerror!u64 {
     // Create streams for file access
     var seekable = std.fs.File.seekableStream(file);
     var in_stream = std.fs.File.inStream(file);
@@ -71,9 +71,9 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
 
     // step backwards until front of file or n new lines found
     var offset: u64 = 0;
-    var new_lines: u32 = 0;
+    var amt_read: u32 = 0;
     var char: u8 = undefined;
-    while (new_lines < (n + 1) and offset < endPos) {
+    while (amt_read < (n + 1) and offset < endPos) {
         offset += 1;
         seekable.stream.seekTo(endPos - offset) catch |err| {
             try stdout.print("Error: cannot seek: {}\n", .{err});
@@ -84,7 +84,11 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
             try stdout.print("Error: cannot read byte: {}\n", .{err});
             return err;
         };
-        if (char == '\n') new_lines += 1;
+        if (char == '\n' and !is_bytes) {
+            amt_read += 1;
+        } else if (is_bytes) {
+            amt_read += 1;
+        }
     }
 
     // adjust offset if consumed \n
@@ -93,9 +97,10 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
     return endPos - offset;
 }
 
-pub fn str_to_n(str: ?[]u8) anyerror!u32 {
-    return 10;
-    //   return std.mem.readInt()
+pub fn str_to_n(str: []u8) anyerror!u32 {
+    return std.fmt.parseInt(u32, str, 10) catch |err| {
+        return 0;
+    };
 }
 
 const TailFlags = enum {
@@ -123,11 +128,20 @@ var flags = [_]opt.Flag(TailFlags){
         .name = TailFlags.Bytes,
         .short = 'c',
         .kind = opt.ArgTypeTag.String,
+        .mandatory = true,
     },
     .{
         .name = TailFlags.Lines,
         .short = 'n',
+        .kind = opt.ArgTypeTag.String,
+        .mandatory = true,
     },
+};
+
+const PrintOptions = enum {
+    Full,
+    Lines,
+    Bytes,
 };
 
 pub fn main() !void {
@@ -139,8 +153,9 @@ pub fn main() !void {
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     var forever: bool = false;
-    var bytes: bool = false;
-    var length: ?[]u8 = null;
+    var opts: PrintOptions = PrintOptions.Full;
+
+    var length: []u8 = undefined;
 
     var it = opt.FlagIterator(TailFlags).init(flags[0..], args);
     while (it.next_flag() catch {
@@ -159,28 +174,21 @@ pub fn main() !void {
                 forever = true;
             },
             TailFlags.Bytes => {
-                bytes = true;
+                opts = PrintOptions.Bytes;
                 length = flag.value.String.?;
             },
             TailFlags.Lines => {
+                opts = PrintOptions.Lines;
                 length = flag.value.String.?;
             },
         }
     }
 
-    var n = try str_to_n(length);
+    var n: u32 = std.math.maxInt(u32) - 1;
+    if (opts != PrintOptions.Full) n = try str_to_n(length[0..]);
 
     // TODO Go in stdin read mode try stdout.print("{}", .{it.argv.len});
-    while (true) {
-        // has to be a const i guess so can't have a nice loop.
-        const file_name = it.next_arg() orelse break;
-        const f_name: []const u8 = file_name;
-        try tail(n, f_name);
+    while (it.next_arg()) |file_name| {
+        try tail(n, file_name[0..], opts == PrintOptions.Bytes);
     }
-
-    // run command
-    //tail(n, args[1]) catch |err| {
-    //   try stdout.print("Error: {}\n", .{err});
-    //   return;
-    //};
 }
