@@ -8,14 +8,7 @@ pub fn makeDirectory(name: []const u8) !void {
     };
 }
 
-pub fn main() anyerror!u8 {
-    // out of memory panic
-    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
-        try stdout.print("Out of memory: {}\n", .{err});
-        return 1;
-    };
-    defer std.process.argsFree(std.heap.page_allocator, args);
-
+pub fn main(args: [][]u8) anyerror!u8 {
     // check len of args
     if (args.len < 2) {
         try stdout.print("mkdir: missing operands\n", .{});

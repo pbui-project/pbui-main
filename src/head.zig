@@ -49,19 +49,12 @@ pub fn head(n: u32, path: []const u8) !void {
 
 // Testing...  For now here is usage
 // ./head FILE n
-pub fn main() anyerror!u8 {
+pub fn main(args: [][]u8) anyerror!u8 {
     const r: u8 = 1;
-
-    // out of memory panic
-    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
-        try stdout.print("Out of memory: {}\n", .{err});
-        return r;
-    };
-    defer std.process.argsFree(std.heap.page_allocator, args);
 
     // check len of args
     if (args.len != 3) {
-        try stdout.print("usage: ./head FILE n\n", .{});
+        try stdout.print("usage: FILE n\n", .{});
         return r;
     }
 
