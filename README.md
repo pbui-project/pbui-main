@@ -3,7 +3,7 @@
 <h1 align="center">pbui-main</h1>
 </p>
 
-[![asciicast](https://chadpaste.com/f/qze.gif)
+![asciicast](https://chadpaste.com/f/qze.gif)
 
 
 ## What is the PBUI project?
