@@ -44,24 +44,18 @@ pub fn wc (path: []const u8) !void {
     
 }
 
-pub fn main() !void {
-    // out of memory panic
-    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
-        try stdout.print("Out of memory: {}\n", .{err});
-        return;
-    };
-    defer std.process.argsFree(std.heap.page_allocator, args);
-
+pub fn main(args: [] [] u8) anyerror! u8{
     // check len of args
     if (args.len < 2) {
         try stdout.print("usage: ./wc [FILE] \n", .{});
-        return;
+        return 1;
     }
 
     // call function
     wc(args[1]) catch |err| {
         try stdout.print("Error: {}\n", .{err});
-        return;
+        return 1;
     };
-   
+
+    return 0;
 }

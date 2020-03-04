@@ -8,7 +8,7 @@ const sleep = @import("sleep.zig");
 const tail = @import("tail.zig");
 const tru = @import("true.zig");
 const head = @import("head.zig");
-
+const wc = @import("wc.zig");
 const std = @import("std");
 const opt = @import("opt.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
@@ -137,6 +137,9 @@ pub fn main() anyerror!u8 {
     } else if (std.mem.eql(u8, applet_name, "true")) {
         warn("Call to true (missing arguments)\n", .{});
         return tru.main(it.argv[1..]);
+    }
+    else if (std.mem.eql(u8, applet_name, "wc")) {
+        return wc.main(it.argv[1..]);
     } else {
         warn("Bleh", .{});
     }
