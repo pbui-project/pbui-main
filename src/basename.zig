@@ -59,22 +59,10 @@ var flags = [_]opt.Flag(BasenameFlags){
     },
 };
 
-pub fn main() anyerror!u8 {
-    // out of memory panic
-    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
-        try stdout.print("Out of memory: {}\n", .{err});
-        return 1;
-    };
-    defer std.process.argsFree(std.heap.page_allocator, args);
-
+pub fn main(args: [][]u8) anyerror!u8 {
     var multiple: bool = false;
     var eolchar: u8 = '\n';
     var suffix: ?[]u8 = null;
-    // check len of args
-    // if (args.len != 2) {
-    //     try stdout.print("usage: ./basename FILENAME\n", .{});
-    //     return;
-    // }
 
     var it = opt.FlagIterator(BasenameFlags).init(flags[0..], args);
     while (it.next_flag() catch {
