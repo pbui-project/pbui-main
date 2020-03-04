@@ -1,19 +1,19 @@
-const basename  = @import("basename.zig");
-const dirname   = @import("dirname.zig");
-const fls       = @import("false.zig");
-const ls        = @import("ls.zig");
-const mkdir     = @import("mkdir.zig");
-const rm        = @import("rm.zig");
-const sleep     = @import("sleep.zig");
-const tail      = @import("tail.zig");
-const tru       = @import("true.zig");     
-const head      = @import("head.zig");
+const basename = @import("basename.zig");
+const dirname = @import("dirname.zig");
+const fls = @import("false.zig");
+const ls = @import("ls.zig");
+const mkdir = @import("mkdir.zig");
+const rm = @import("rm.zig");
+const sleep = @import("sleep.zig");
+const tail = @import("tail.zig");
+const tru = @import("true.zig");
+const head = @import("head.zig");
 
-const std       = @import("std");
-const opt       = @import("opt.zig");
-const stdout    = &std.io.getStdOut().outStream().stream;
-const warn      = std.debug.warn;
-const testing   = std.testing;
+const std = @import("std");
+const opt = @import("opt.zig");
+const stdout = &std.io.getStdOut().outStream().stream;
+const warn = std.debug.warn;
+const testing = std.testing;
 
 const mainFlags = enum {
     Help,
@@ -29,65 +29,67 @@ const mainFlags = enum {
     True,
 };
 
-var flags = [_]opt.Flag(mainFlags) {
+var flags = [_]opt.Flag(mainFlags){
     .{
-        .name    = mainFlags.Help,
-        .short  = 'h',
-        .long   = "help"
-    },
-    .{ 
-        .name   = mainFlags.Basename,
-        .long   = "basename",
+        .name = mainFlags.Help,
+        .short = 'h',
+        .long = "help",
     },
     .{
-        .name   = mainFlags.Dirname,
-        .long   = "dirname",
+        .name = mainFlags.Basename,
+        .long = "basename",
     },
     .{
-        .name   = mainFlags.False,
-        .long   = "false",
+        .name = mainFlags.Dirname,
+        .long = "dirname",
     },
     .{
-        .name   = mainFlags.Head,
-        .long   = "head",
+        .name = mainFlags.False,
+        .long = "false",
     },
     .{
-        .name   = mainFlags.LS,
-        .long   = "ls",
+        .name = mainFlags.Head,
+        .long = "head",
     },
     .{
-        .name   = mainFlags.MKDir,
-        .long   = "mkdir",
+        .name = mainFlags.LS,
+        .long = "ls",
     },
     .{
-        .name   = mainFlags.RM,
-        .long   = "rm",
+        .name = mainFlags.MKDir,
+        .long = "mkdir",
     },
     .{
-        .name   = mainFlags.Sleep,
-        .long   = "sleep",
+        .name = mainFlags.RM,
+        .long = "rm",
     },
     .{
-        .name   = mainFlags.Tail,
-        .long   = "tail",
+        .name = mainFlags.Sleep,
+        .long = "sleep",
     },
     .{
-        .name   = mainFlags.True,
-        .long   = "true",
+        .name = mainFlags.Tail,
+        .long = "tail",
+    },
+    .{
+        .name = mainFlags.True,
+        .long = "true",
     },
 };
 
 pub fn usage() anyerror!u8 {
     try stdout.print("Usage: ./pbui APPLET [arguments]\n\nApplets list: \n  basename\n  dirname\n  false\n  head\n  ls\n  mkdir\n  rm\n  sleep\n  tail\n  true\n", .{});
 
-    return 1;
+    const r: u8 = 1;
+    return r;
 }
 
 pub fn main() anyerror!u8 {
+    const r: u8 = 1;
     // Out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return 1;
+        return r;
     };
 
     defer std.process.argsFree(std.heap.page_allocator, args);
@@ -99,7 +101,7 @@ pub fn main() anyerror!u8 {
 
     var it = opt.FlagIterator(mainFlags).init(flags[0..], args);
     while (it.next_flag() catch {
-        return 1;
+        return r;
     }) |flag| {
         switch (flag.name) {
             mainFlags.Help => {
@@ -146,10 +148,10 @@ pub fn main() anyerror!u8 {
                 return tru.main();
             },
         }
-        return 1;
+        return r;
     }
 
-    return 1;
+    return r;
 }
 
 test "Test assertion: addition" {
