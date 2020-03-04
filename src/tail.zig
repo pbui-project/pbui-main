@@ -5,21 +5,13 @@ const stdout = &std.io.getStdOut().outStream().stream;
 const warn = std.debug.warn;
 const BUFSIZ: u16 = 4096;
 
-pub fn tail(n: u32, path: []const u8, is_bytes: bool) !void {
+pub fn tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     // check if user inputs illegal line number
     if (n <= 0) {
         try stdout.print("Error: illegal count: {}\n", .{n});
         return;
     }
 
-    // Open file for reading and put into buffered stream
-    const file = std.fs.File.openRead(path) catch |err| {
-        try stdout.print("Error: cannot open file {}\n", .{path});
-        return;
-    };
-    defer file.close();
-
-    // get the right start position
     var printPos = find_adjusted_start(n, file, is_bytes) catch |err| {
         try stdout.print("Error: {}\n", .{err});
         return;
@@ -38,6 +30,40 @@ pub fn tail(n: u32, path: []const u8, is_bytes: bool) !void {
         try stdout.print("Error: cannot print file: {}\n", .{err});
         return;
     };
+}
+
+pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
+    // check if user inputs illegal line number
+    if (n <= 0) {
+        try stdout.print("Error: illegal count: {}\n", .{n});
+        return;
+    }
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
+    const allocator = &arena.allocator;
+
+    const lines = try allocator.alloc([]u8, n);
+
+    var lineBuf: [BUFSIZ]u8 = undefined;
+
+    var i: u32 = 0;
+
+    while (file.inStream().stream.readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
+        if (segment == null) break;
+
+        std.mem.copy(?[]u8, lines[i][0..], segment[0..]);
+        i += 1;
+        if (i >= n) i = 0;
+        for (lines) |row| {
+            try stdout.print("{}\n", .{row});
+        }
+        try stdout.print("\n\n\n", .{});
+    } else |err| return err;
+
+    for (lines) |row| {
+        try stdout.print("{}\n", .{row});
+    }
 }
 
 // Prints stream from current pointer to end of file in BUFSIZ
@@ -106,7 +132,6 @@ pub fn str_to_n(str: []u8) anyerror!u32 {
 const TailFlags = enum {
     Lines,
     Bytes,
-    Forever,
     Help,
     Version,
 };
@@ -119,10 +144,6 @@ var flags = [_]opt.Flag(TailFlags){
     .{
         .name = TailFlags.Version,
         .long = "version",
-    },
-    .{
-        .name = TailFlags.Forever,
-        .short = 'f',
     },
     .{
         .name = TailFlags.Bytes,
@@ -152,7 +173,6 @@ pub fn main() !void {
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
-    var forever: bool = false;
     var opts: PrintOptions = PrintOptions.Full;
 
     var length: []u8 = undefined;
@@ -170,9 +190,6 @@ pub fn main() !void {
                 warn("(version info here)\n", .{});
                 return;
             },
-            TailFlags.Forever => {
-                forever = true;
-            },
             TailFlags.Bytes => {
                 opts = PrintOptions.Bytes;
                 length = flag.value.String.?;
@@ -184,11 +201,26 @@ pub fn main() !void {
         }
     }
 
-    var n: u32 = std.math.maxInt(u32) - 1;
+    var n: u32 = 10;
     if (opts != PrintOptions.Full) n = try str_to_n(length[0..]);
 
-    // TODO Go in stdin read mode try stdout.print("{}", .{it.argv.len});
+    var files = std.ArrayList([]u8).init(std.heap.page_allocator);
     while (it.next_arg()) |file_name| {
-        try tail(n, file_name[0..], opts == PrintOptions.Bytes);
+        try files.append(file_name);
+    }
+
+    if (files.len > 0) {
+        for (files.toSliceConst()) |file_name| {
+            const file = std.fs.File.openRead(file_name[0..]) catch |err| {
+                try stdout.print("Error: cannot open file {}\n", .{file_name});
+                return;
+            };
+            if (files.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
+            try tail(n, file, opts == PrintOptions.Bytes);
+        }
+    } else {
+        const file = std.io.getStdIn();
+        try alt_tail(n, file, opts == PrintOptions.Bytes);
+        file.close();
     }
 }

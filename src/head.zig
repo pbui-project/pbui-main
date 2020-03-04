@@ -9,7 +9,7 @@ const BUFSIZ: u16 = 4096;
 pub fn head(n: u32, path: []const u8) !void {
     // Check if user inputs illegal line number
     if (n <= 0) {
-        try stdout.print("Error: illegal line count: {}\n", .n);
+        try stdout.print("Error: illegal line count: {}\n", .{n});
         return;
     }
 
