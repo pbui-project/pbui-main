@@ -2,9 +2,14 @@ const Builder = @import("std").build.Builder;
 
 pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
-    const lib = b.addStaticLibrary("temp", "src/main.zig");
-    lib.setBuildMode(mode);
-    lib.install();
+    const exe = b.addExecutable("pbui", "src/main.zig");
+    exe.setBuildMode(mode);
+    exe.install();
+
+    const run_cmd = exe.run();
+    run_cmd.step.dependOn(b.getInstallStep());
+
+    const run_step = b.step("run", "Execute PBUI");
 
     var main_tests = b.addTest("src/main.zig");
     main_tests.setBuildMode(mode);

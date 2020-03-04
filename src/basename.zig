@@ -59,11 +59,11 @@ var flags = [_]opt.Flag(BasenameFlags){
     },
 };
 
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return;
+        return 1;
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
@@ -78,16 +78,16 @@ pub fn main() !void {
 
     var it = opt.FlagIterator(BasenameFlags).init(flags[0..], args);
     while (it.next_flag() catch {
-        return;
+        return 0;
     }) |flag| {
         switch (flag.name) {
             BasenameFlags.Help => {
                 warn("(help screen here)\n", .{});
-                return;
+                return 0;
             },
             BasenameFlags.Version => {
                 warn("(version info here)\n", .{});
-                return;
+                return 0;
             },
             BasenameFlags.Multiple => {
                 multiple = true;
@@ -109,7 +109,7 @@ pub fn main() !void {
             if (it.next_arg()) |arg| {
                 warn("{}: extra operand '{}'\n", .{ args[0], arg });
                 warn("Try '{} --help' for more information.\n", .{args[0]});
-                return;
+                return 1;
             }
         }
         try basename(first, eolchar, suffix);
@@ -121,6 +121,8 @@ pub fn main() !void {
     } else {
         warn("{}: missing operand.\n", .{args[0]});
         warn("Try '{} --help' for more information.\n", .{args[0]});
-        return;
+        return 1;
     }
+
+    return 0;
 }

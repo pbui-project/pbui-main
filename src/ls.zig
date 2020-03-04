@@ -30,7 +30,7 @@ fn show_directory(path: []const u8) !void {
 
 }
 
-pub fn main() !void {
+pub fn main() anyerror!u8 {
     const args = try std.process.argsAlloc(std.heap.page_allocator);
     defer std.process.argsFree(std.heap.page_allocator, args);
 
@@ -41,5 +41,7 @@ pub fn main() !void {
             }
         }
     } else const result = show_directory(".");
+
+    return 0;
 
 }
