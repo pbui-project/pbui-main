@@ -85,7 +85,8 @@ pub fn usage() anyerror!u8 {
 }
 
 pub fn main() anyerror!u8 {
-    const r: u8 = 1;
+    const r: anyerror!u8 = 1;
+
     // Out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
@@ -100,6 +101,7 @@ pub fn main() anyerror!u8 {
     }
 
     var it = opt.FlagIterator(mainFlags).init(flags[0..], args);
+
     while (it.next_flag() catch {
         return r;
     }) |flag| {
@@ -117,7 +119,8 @@ pub fn main() anyerror!u8 {
                 return dirname.main();
             },
             mainFlags.False => {
-                warn("Call to false currently broken\n", .{});
+                warn("Call to false (missing arguments)\n", .{});
+                return fls.main();
             },
             mainFlags.Head => {
                 warn("Call to head (missing arguments)\n", .{});
@@ -147,6 +150,9 @@ pub fn main() anyerror!u8 {
                 warn("Call to true (missing arguments)\n", .{});
                 return tru.main();
             },
+            else => {
+                warn("Bleh", .{});
+            }
         }
         return r;
     }
