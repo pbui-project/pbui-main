@@ -1,6 +1,7 @@
 <p align="center">
 <img src="https://pbui.codes/logo.png" width="25%">
 <h1 align="center">pbui-main</h1>
+<h5 align="center">Like idlebin, but in zig</h5>
 </p>
 
 ![asciicast](https://chadpaste.com/f/qze.gif)
