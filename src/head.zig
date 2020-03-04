@@ -9,7 +9,7 @@ const BUFSIZ: u16 = 4096;
 pub fn head(n: u32, path: []const u8) !void {
     // Check if user inputs illegal line number
     if (n <= 0) {
-        try stdout.print("Error: illegal line count: {}\n", .n);
+        try stdout.print("Error: illegal line count: {}\n", .{n});
         return;
     }
 
@@ -50,29 +50,31 @@ pub fn head(n: u32, path: []const u8) !void {
 // Testing...  For now here is usage
 // ./head FILE n
 pub fn main() anyerror!u8 {
+    const r: u8 = 1;
+
     // out of memory panic
     const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
         try stdout.print("Out of memory: {}\n", .{err});
-        return 1;
+        return r;
     };
     defer std.process.argsFree(std.heap.page_allocator, args);
 
     // check len of args
     if (args.len != 3) {
         try stdout.print("usage: ./head FILE n\n", .{});
-        return 1;
+        return r;
     }
 
     // must be a number
     const n = std.fmt.parseInt(u32, args[2], 10) catch |err| {
         try stdout.print("Error: second arg must be a number!\n", .{});
-        return 1;
+        return r;
     };
 
     // run command
     head(n, args[1]) catch |err| {
         try stdout.print("Error: {}\n", .{err});
-        return 1;
+        return r;
     };
 
     return 0;
