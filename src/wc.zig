@@ -6,7 +6,7 @@ const BUFSIZ: u16 = 4096;
 
 pub fn wc (path: []const u8) !void {
     // Open file for reading and put into buffered stream    
-    const file = try std.fs.cwd().openFile(path, .{});
+const file = try std.fs.cwd().openFile(path, .{});
     defer file.close();
     var buffered_stream = std.io.BufferedInStream(std.fs.File.InStream.Error).init(&file.inStream().stream);
 
