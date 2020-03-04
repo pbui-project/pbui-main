@@ -4,6 +4,16 @@
 <h5 align="center">Like idlebin, but in zig</h5>
 </p>
 
+
+
+<p align="center">
+  <img src="https://img.shields.io/github/issues-pr/pbui-project/pbui-main">
+  <img src="https://img.shields.io/github/issues/pbui-project/pbui-main">
+  <img src="https://img.shields.io/github/issues-raw/pbui-project/pbui-main/good%20first%20issue?label=Good%20first%20issues">
+  <img src="https://img.shields.io/github/languages/top/pbui-project/pbui-main">
+  <img src="https://github.com/pbui-project/pbui-main/workflows/CI/badge.svg?branch=master">
+</p>
+
 ![asciicast](https://chadpaste.com/f/qze.gif)
 
 
@@ -19,8 +29,8 @@ applets. By doing this, we hope to make Zig more user friendly and encourage oth
 
 ## Dependencies
 Supported operating systems:
-  - Linux kernel >= `5.4.23` (Validated for Ubuntu)
-  - Zig `0.5.0+ab4ea5d3c`
+  - Linux kernel >= 5.4.23 (Validated for Ubuntu)
+  - Zig 0.5.0+ab4ea5d3c
   
 ## Installation
 After cloning the repository, run `zig build`.  The `pbui` executable will be located in `zig-cache/bin/pbui`.
