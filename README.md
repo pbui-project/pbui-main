@@ -1,9 +1,7 @@
-# pbui-main
-
-<p style="center">
-<img src="https://pbui.codes/logo.png" style="width:25%;">
+<p align="center">
+<img src="https://pbui.codes/logo.png" width="25%">
 </p>
-
+# pbui-main
 
 [![asciicast](https://chadpaste.com/f/qze.gif)
 
