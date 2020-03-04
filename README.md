@@ -1,11 +1,11 @@
 # pbui-main
 
 <p style="center">
-<img src="https://pbui.codes/logo.png">
+<img src="https://pbui.codes/logo.png" style="width:25%;">
 </p>
 
 
-[![asciicast](https://asciinema.org/a/XFSZbrLIAKAODqsTUjDLzLFBw.svg)](https://asciinema.org/a/XFSZbrLIAKAODqsTUjDLzLFBw)
+[![asciicast](https://chadpaste.com/f/qze.gif)
 
 
 ## What is the PBUI project?
