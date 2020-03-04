@@ -4,6 +4,10 @@
 <img src="https://pbui.codes/logo.png">
 </p>
 
+
+[![asciicast](https://asciinema.org/a/XFSZbrLIAKAODqsTUjDLzLFBw.svg)](https://asciinema.org/a/XFSZbrLIAKAODqsTUjDLzLFBw)
+
+
 ## What is the PBUI project?
 
 The PBUI (POSIX-compliant BSD/Linux Userland Implementation) project is a a free and open source project intended 
