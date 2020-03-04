@@ -19,8 +19,8 @@ applets. By doing this, we hope to make Zig more user friendly and encourage oth
 
 ## Dependencies
 Supported operating systems:
-  - Linux kernel >= 5.4.23 (Validated for Ubuntu)
-  - Zig 0.5.0+ab4ea5d3c
+  - Linux kernel >= `5.4.23` (Validated for Ubuntu)
+  - Zig `0.5.0+ab4ea5d3c`
   
 ## Installation
 After cloning the repository, run `zig build`.  The `pbui` executable will be located in `zig-cache/bin/pbui`.
