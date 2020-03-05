@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   lint:
-    name:   Linting
+    name:   Linting and Format
     runs-on: ubuntu-latest
     
     steps:
@@ -17,7 +17,6 @@ jobs:
   build:
     name:   Zig Build/Test
     runs-on: ubuntu-latest
-    needs:  lint
 
     steps:
     - uses: actions/checkout@v1
