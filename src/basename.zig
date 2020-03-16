@@ -9,7 +9,7 @@ pub fn basename(path: []const u8, terminator: []const u8, suffix: ?[]u8, allocat
         return try concat(allocator, "/", terminator);
     }
     const name = std.fs.path.basename(path);
-    
+
     var stripped: [*]u8 = undefined;
     if (suffix) |suf| {
         if (std.mem.eql(u8, name[name.len - suf.len ..], suf)) {
