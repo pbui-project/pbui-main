@@ -10,22 +10,10 @@ const tru = @import("true.zig");
 const head = @import("head.zig");
 const wc = @import("wc.zig");
 const std = @import("std");
-const opt = @import("opt.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
 const warn = std.debug.warn;
 const testing = std.testing;
-
-const mainFlags = enum {
-    Help,
-};
-
-var flags = [_]opt.Flag(mainFlags){
-    .{
-        .name = mainFlags.Help,
-        .short = 'h',
-        .long = "help",
-    },
-};
+const assert = @import("std").debug.assert;
 
 pub fn usage(args: [][]u8) anyerror!u8 {
     try stdout.print(
@@ -59,30 +47,7 @@ pub fn main() anyerror!u8 {
         try stdout.print("Out of memory: {}\n", .{err});
         return r;
     };
-
     defer std.process.argsFree(std.heap.page_allocator, args);
-
-    var it = opt.FlagIterator(mainFlags).init(flags[0..], args);
-
-    // TODO FLAGS DONT WORK
-    // Find where the applet name is if it is there...
-    // then splice the array
-    // look for pbui flags on the left
-    // then applet on right
-
-    while (it.next_flag() catch {
-        return r;
-    }) |flag| {
-        switch (flag.name) {
-            mainFlags.Help => {
-                return usage(it.argv);
-            },
-
-            else => {
-                return usage(it.argv);
-            },
-        }
-    }
 
     _ = try func_map.put("basename", basename.main);
     _ = try func_map.put("false", fls.main);
@@ -95,15 +60,28 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("true", tru.main);
     _ = try func_map.put("wc", wc.main);
 
-    if (it.argv.len < 2) {
-        return usage(it.argv);
+    // check basename of exe
+    var buffer: [100]u8 = undefined;
+    const allocator = &std.heap.FixedBufferAllocator.init(&buffer).allocator;
+    var empty = "";
+    var tes = try basename.basename(args[0], empty[0..], null, allocator);
+
+    // check if basename is right
+    var yeet = func_map.getValue(tes) orelse null;
+    if (yeet) |applet| {
+        return applet(args[0..]);
     }
 
-    var applet_name = it.next_arg().?;
+    // otherwise check argv for applet name
+    if (args.len < 2 or std.mem.eql(u8, args[1], "-h") or std.mem.eql(u8, args[1], "--help")) {
+        return usage(args);
+    }
+
+    var applet_name = args[1];
 
     var ab = func_map.getValue(applet_name) orelse usage;
 
-    return ab(it.argv[1..]);
+    return ab(args[1..]);
 }
 
 test "Test assertion: addition" {
