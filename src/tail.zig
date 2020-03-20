@@ -38,31 +38,44 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
         try stdout.print("Error: illegal count: {}\n", .{n});
         return;
     }
+
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
     const allocator = &arena.allocator;
 
-    const lines = try allocator.alloc([]u8, n);
+    const lines = try allocator.alloc([1000]u8, n);
 
     var lineBuf: [BUFSIZ]u8 = undefined;
 
     var i: u32 = 0;
 
+    var top: u32 = 0; // oldest row
+
     while (file.inStream().stream.readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
         if (segment == null) break;
+        std.mem.copy(u8, lines[i][0..], segment.?);
 
-        std.mem.copy(?[]u8, lines[i][0..], segment[0..]);
-        i += 1;
-        if (i >= n) i = 0;
-        for (lines) |row| {
-            try stdout.print("{}\n", .{row});
+        // add \x00 to end of string
+        var x: usize = segment.?.len;
+        lines[i][segment.?.len] = '\x00';
+        while (x < 1000) : (x += 1) {
+            lines[i][x] = '\x00';
         }
-        try stdout.print("\n\n\n", .{});
+        i += 1;
+        top = i; // i love top
+        if (i >= n) {
+            i = 0;
+        }
     } else |err| return err;
 
-    for (lines) |row| {
-        try stdout.print("{}\n", .{row});
+    var x: u32 = top;
+    try stdout.print("{}\n", .{lines[x]});
+    x += 1;
+
+    while (x != top) : (x += 1) {
+        if (x >= n) x = 0;
+        try stdout.print("{}\n", .{lines[x]});
     }
 }
 
