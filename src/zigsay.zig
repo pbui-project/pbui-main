@@ -1,8 +1,10 @@
 const std = @import("std");
+const opt = @import("opt.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
 const stdin = &std.io.getStdIn().inStream().stream;
 
 var global_allocator: *mem.Allocator = undefined;
+const VERSION = "0.0.1";
 
 const BUFSIZE: usize = 4096;
 const MAXLEN: usize = 39;
@@ -22,6 +24,24 @@ const ZIGUANA =
     \\          |/\/\|    |/\/\|
     \\jro
     ;
+
+const ZigsayFlags = enum {
+    Help,
+    Version,
+};
+
+var flags = [_]opt.Flag(ZigsayFlags){
+    .{
+        .name = ZigsayFlags.Help,
+        .long = "help",
+        .short = 'h',
+    },
+    .{
+        .name = ZigsayFlags.Version,
+        .long = "version",
+        .short = 'v',
+    },
+};
 
 fn read_stdin() ![]u8 {
     // open stdin in a buffered stream
@@ -170,10 +190,21 @@ pub fn zigsay(input: []u8) !void {
 }
 
 pub fn main(args: [][]u8) anyerror! u8{
-    // usage information
-    if (args.len > 1 and std.mem.eql(u8, args[1], "-h")) {
-        std.debug.warn("usage: cowsay [INPUT or will read from stdin]\n", .{});
+    // parse arguments
+    var it = opt.FlagIterator(ZigsayFlags).init(flags[0..], args);
+    while (it.next_flag() catch {
         return 0;
+    }) |flag| {
+        switch (flag.name) {
+            ZigsayFlags.Help => {
+                std.debug.warn("usage: cowsay [INPUT or will read from stdin]\n", .{});
+                return 0;
+            },
+            ZigsayFlags.Version => {
+                std.debug.warn("version: {}\n", .{VERSION});
+                return 0;
+            },
+        }
     }
 
     // read from stdin or merge arguments
