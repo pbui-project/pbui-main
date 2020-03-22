@@ -52,6 +52,7 @@ For a list of applets, run `./pbui` or `./pbui -h`.  Currently supported applets
   - `tail`
   - `true`
   - `wc`
+  - `zigsay`
 
 To run a given applet, use: `./pbui [APPLET] [arguments]`.
   
