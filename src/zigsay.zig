@@ -3,7 +3,6 @@ const opt = @import("opt.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
 const stdin = &std.io.getStdIn().inStream().stream;
 
-var global_allocator: *mem.Allocator = undefined;
 const VERSION = "0.0.1";
 
 const BUFSIZE: usize = 4096;
@@ -43,14 +42,14 @@ var flags = [_]opt.Flag(ZigsayFlags){
     },
 };
 
-fn read_stdin() ![]u8 {
+fn read_stdin(allocator: *std.mem.Allocator) ![]u8 {
     // open stdin in a buffered stream
     var buffered_stream = std.io.BufferedInStream(std.fs.File.InStream.Error).init(stdin);
 
     // initialize read and input buffer
     var read_buffer: [BUFSIZE]u8 = undefined;
 
-    var input_buffer = try std.Buffer.init(std.testing.allocator, "");
+    var input_buffer = try std.Buffer.init(allocator, "");
     defer input_buffer.deinit();
 
     // read input into read_buffer, appending to input_buffer
@@ -62,9 +61,9 @@ fn read_stdin() ![]u8 {
     return input_buffer.toOwnedSlice();
 }
 
-fn concat(words: [][]u8) ![]u8 {
+fn concat(words: [][]u8, allocator: *std.mem.Allocator) ![]u8 {
     // initialize line buffer
-    var result_buffer = try std.Buffer.init(std.testing.allocator, "");
+    var result_buffer = try std.Buffer.init(allocator, "");
     defer result_buffer.deinit();
 
     for (words) |word, i| {
@@ -76,13 +75,13 @@ fn concat(words: [][]u8) ![]u8 {
     return result_buffer.toOwnedSlice();
 }
 
-fn wrap(s: []u8) ![][]u8 {
+fn wrap(s: []u8, allocator: *std.mem.Allocator) ![][]u8 {
     // initialize result list
-    var result = std.ArrayList([]u8).init(std.testing.allocator);
+    var result = std.ArrayList([]u8).init(allocator);
     defer result.deinit();
 
     // initialize line buffer
-    var line_buffer = try std.Buffer.init(std.testing.allocator, "");
+    var line_buffer = try std.Buffer.init(allocator, "");
     defer line_buffer.deinit();
 
     // initialize iterator and word and line start
@@ -131,7 +130,7 @@ fn wrap(s: []u8) ![][]u8 {
     return result.toOwnedSlice();
 }
 
-fn print_repeat(symbol: u8, count: usize, full_line: bool) !void {
+fn print_repeat(symbol: u8, count: usize, full_line: bool, allocator: *std.mem.Allocator) !void {
     if (full_line)
         try stdout.print(" ", .{});
 
@@ -143,13 +142,13 @@ fn print_repeat(symbol: u8, count: usize, full_line: bool) !void {
         try stdout.print(" \n", .{});
 }
 
-fn print_dialog_box(lines: [][]u8) !void {
+fn print_dialog_box(lines: [][]u8, allocator: *std.mem.Allocator) !void {
     var max_len: usize = 0;
 
     for (lines) |line|
         max_len = if (line.len > max_len) line.len else max_len;
 
-    try print_repeat('_', max_len + 2, true);
+    try print_repeat('_', max_len + 2, true, allocator);
 
     for (lines) |line, i| {
         var start_char: u8 = '|';
@@ -168,22 +167,22 @@ fn print_dialog_box(lines: [][]u8) !void {
 
         try stdout.print("{c} {} ", .{start_char, line});
         if (line.len < max_len)
-            try print_repeat(' ', max_len - line.len, false);
+            try print_repeat(' ', max_len - line.len, false, allocator);
         try stdout.print("{c}\n", .{end_char});
     }
 
-    try print_repeat('-', max_len + 2, true);
+    try print_repeat('-', max_len + 2, true, allocator);
 }
 
-pub fn zigsay(input: []u8) !void {
+pub fn zigsay(input: []u8, allocator: *std.mem.Allocator) !void {
     // necessary due to iguana drawing being too long
     @setEvalBranchQuota(1500);
 
     // wrap to create dialogue box
-    var wrapped_input = try wrap(input);
+    var wrapped_input = try wrap(input, allocator);
 
     // print dialog box
-    try print_dialog_box(wrapped_input);
+    try print_dialog_box(wrapped_input, allocator);
 
     // print Ziguana's body
     try stdout.print(ZIGUANA, .{});
@@ -207,11 +206,16 @@ pub fn main(args: [][]u8) anyerror! u8{
         }
     }
 
+    // create allocator
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+    const allocator = &arena.allocator;
+
     // read from stdin or merge arguments
-    var input = if (args.len == 1) try read_stdin() else try concat(args[1..]);
+    var input = if (args.len == 1) try read_stdin(allocator) else try concat(args[1..], allocator);
 
     // call function
-    zigsay(input) catch |err| {
+    zigsay(input, allocator) catch |err| {
         std.debug.warn("Error: {}\n", .{err});
         return 1;
     };
