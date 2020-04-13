@@ -80,6 +80,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
         }
     } else {
         try stdout.print("cat FILE_NAME ..\n", .{});
+        return 1;
     }
     return 0;
 }
