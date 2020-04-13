@@ -1,3 +1,5 @@
+const opt = @import("opt.zig");
+const warn = std.debug.warn;
 const std = @import("std");
 const stdout = &std.io.getStdOut().outStream().stream;
 
@@ -48,7 +50,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             CatFlags.Help => {
-                warn("(help screen here)\n", .{});
+                warn("cat FILE_NAME ..\n", .{});
                 return 1;
             },
             CatFlags.Version => {
@@ -77,11 +79,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
             file.close();
         }
     } else {
-        cat(std.io.getStdIn()) catch |err| {
-            try stdout.print("Error: {}\n", .{err});
-            return 1;
-        };
+        try stdout.print("cat FILE_NAME ..\n", .{});
     }
-
     return 0;
 }
