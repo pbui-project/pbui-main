@@ -245,11 +245,11 @@ pub fn main(args: [][]u8) anyerror!u8 {
             };
             if (files.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
             try tail(n, file, opts == PrintOptions.Bytes);
+            file.close();
         }
     } else {
         const file = std.io.getStdIn();
         try alt_tail(n, file, opts == PrintOptions.Bytes);
-        file.close();
     }
     return 0;
 }
