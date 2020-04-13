@@ -3,11 +3,7 @@ const stdout = &std.io.getStdOut().outStream().stream;
 
 const BUFSIZ: u16 = 4096;
 
-pub fn cat(path: []const u8) !void {
-    // Open file for reading and put into buffered stream
-    const file = try std.fs.File.openRead(path);
-    defer file.close();
-
+pub fn cat(file: std.fs.File) !void {
     // print file from start pos
     var in_stream = std.fs.File.inStream(file);
     print_stream(&in_stream.stream) catch |err| {
@@ -29,23 +25,63 @@ pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
     }
 }
 
-pub fn main() !void {
-    // out of memory panic
-    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
-        try stdout.print("Out of memory: {}\n", .{err});
-        return;
-    };
-    defer std.process.argsFree(std.heap.page_allocator, args);
+const CatFlags = enum {
+    Help,
+    Version,
+};
 
-    // check len of args
-    if (args.len != 2) {
-        try stdout.print("usage: {} FILE\n", .{args[0]});
-        return;
+var flags = [_]opt.Flag(CatFlags){
+    .{
+        .name = CatFlags.Help,
+        .long = "help",
+    },
+    .{
+        .name = CatFlags.Version,
+        .long = "version",
+    },
+};
+
+pub fn main(args: [][]u8) anyerror!u8 {
+    var it = opt.FlagIterator(CatFlags).init(flags[0..], args);
+    while (it.next_flag() catch {
+        return 1;
+    }) |flag| {
+        switch (flag.name) {
+            CatFlags.Help => {
+                warn("(help screen here)\n", .{});
+                return 1;
+            },
+            CatFlags.Version => {
+                warn("(version info here)\n", .{});
+                return 1;
+            },
+        }
     }
 
-    // run command
-    cat(args[1]) catch |err| {
-        try stdout.print("Error: {}\n", .{err});
-        return;
-    };
+    var files = std.ArrayList([]u8).init(std.heap.page_allocator);
+    while (it.next_arg()) |file_name| {
+        try files.append(file_name);
+    }
+
+    if (files.len > 0) {
+        for (files.toSliceConst()) |file_name| {
+            const file = std.fs.File.openRead(file_name[0..]) catch |err| {
+                try stdout.print("Error: cannot open file {}\n", .{file_name});
+                return 1;
+            };
+            // run command
+            cat(file) catch |err| {
+                try stdout.print("Error: {}\n", .{err});
+                return 1;
+            };
+            file.close();
+        }
+    } else {
+        cat(std.io.getStdIn()) catch |err| {
+            try stdout.print("Error: {}\n", .{err});
+            return 1;
+        };
+    }
+
+    return 0;
 }
