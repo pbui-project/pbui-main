@@ -1,26 +1,18 @@
 const std = @import("std");
+const opt = @import("opt.zig");
 const File = &std.io.getStdOut().outStream().stream;
 const stdout = &std.io.getStdOut().outStream().stream;
-
+const warn = std.debug.warn;
 const BUFSIZ: u16 = 4096;
 
-pub fn tail(n: u32, path: []const u8) !void {
+pub fn tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     // check if user inputs illegal line number
     if (n <= 0) {
-        try stdout.print("Error: illegal line count: {}\n", .{n});
+        try stdout.print("Error: illegal count: {}\n", .{n});
         return;
     }
 
-    // Open file for reading and put into buffered stream
-    //const file = try std.fs.File.openRead(path);
-    const file = std.fs.cwd().openFile(path, .{ .read = true }) catch |err| {
-        try stdout.print("Error: cant open file with read: {}\n", .{n});
-        return;
-    };
-    defer file.close();
-
-    // get the right start position
-    var printPos = find_adjusted_start(n, file) catch |err| {
+    var printPos = find_adjusted_start(n, file, is_bytes) catch |err| {
         try stdout.print("Error: {}\n", .{err});
         return;
     };
@@ -40,6 +32,72 @@ pub fn tail(n: u32, path: []const u8) !void {
     };
 }
 
+// for stdin reading
+pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
+    // check if user inputs illegal line number
+    if (n <= 0) {
+        try stdout.print("Error: illegal count: {}\n", .{n});
+        return;
+    }
+    const allocator = std.heap.c_allocator;
+
+    const lines = try allocator.alloc([]u8, n);
+
+    // make sure stuff is actually there in array in comparison later
+    var lineBuf: [BUFSIZ]u8 = undefined;
+
+    var i: u32 = 0;
+
+    var top: u32 = 0; // oldest row
+    var first_time: bool = true;
+
+    // add lines to buffer
+    while (file.inStream().stream.readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
+        if (segment == null) break;
+        // dealloc if already exist
+        if (!first_time) allocator.free(lines[i]);
+        lines[i] = try allocator.alloc(u8, segment.?.len);
+        std.mem.copy(u8, lines[i], segment.?);
+        i += 1;
+        top = i; // i love top
+        if (i >= n) {
+            i = 0;
+            first_time = false;
+        }
+    } else |err| return err;
+
+    var x: u32 = top;
+    if (!is_bytes) {
+        i = 0;
+        while ((i == 0 or x != top) and i <= n) : (x += 1) {
+            // loop buffer location around
+            if (x >= n) x = 0;
+            try stdout.print("{}\n", .{lines[x]});
+            i += 1;
+        }
+    } else {
+        x -= 1; // go to bottom and work up
+
+        // find starting point
+        var bytes_ate: usize = 0;
+        var start_pos: usize = 0;
+        while (x != top) : (x -= 1) {
+            bytes_ate += lines[x].len + 1;
+            if (bytes_ate >= n) {
+                start_pos = bytes_ate - n;
+                break;
+            }
+        }
+
+        // print till end
+        while (x != top) : (x += 1) {
+            if (x >= n) x = 0;
+            try stdout.print("{}\n", .{lines[x][start_pos..]});
+            start_pos = 0;
+        }
+    }
+}
+
 // Prints stream from current pointer to end of file in BUFSIZ
 // chunks.
 pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
@@ -52,7 +110,7 @@ pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
     }
 }
 
-pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
+pub fn find_adjusted_start(n: u32, file: std.fs.File, is_bytes: bool) anyerror!u64 {
     // Create streams for file access
     var seekable = std.fs.File.seekableStream(file);
     var in_stream = std.fs.File.inStream(file);
@@ -71,9 +129,9 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
 
     // step backwards until front of file or n new lines found
     var offset: u64 = 0;
-    var new_lines: u32 = 0;
+    var amt_read: u32 = 0;
     var char: u8 = undefined;
-    while (new_lines < (n + 1) and offset < endPos) {
+    while (amt_read < (n + 1) and offset < endPos) {
         offset += 1;
         seekable.stream.seekTo(endPos - offset) catch |err| {
             try stdout.print("Error: cannot seek: {}\n", .{err});
@@ -84,7 +142,11 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
             try stdout.print("Error: cannot read byte: {}\n", .{err});
             return err;
         };
-        if (char == '\n') new_lines += 1;
+        if (char == '\n' and !is_bytes) {
+            amt_read += 1;
+        } else if (is_bytes) {
+            amt_read += 1;
+        }
     }
 
     // adjust offset if consumed \n
@@ -93,24 +155,104 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File) anyerror!u64 {
     return endPos - offset;
 }
 
-pub fn main(args: [][]u8) anyerror!u8 {
-    // check len of args
-    if (args.len != 3) {
-        try stdout.print("usage: ./head FILE n\n", .{});
-        return 1;
+pub fn str_to_n(str: []u8) anyerror!u32 {
+    return std.fmt.parseInt(u32, str, 10) catch |err| {
+        return 0;
+    };
+}
+
+const TailFlags = enum {
+    Lines,
+    Bytes,
+    Help,
+    Version,
+};
+
+var flags = [_]opt.Flag(TailFlags){
+    .{
+        .name = TailFlags.Help,
+        .long = "help",
+    },
+    .{
+        .name = TailFlags.Version,
+        .long = "version",
+    },
+    .{
+        .name = TailFlags.Bytes,
+        .short = 'c',
+        .kind = opt.ArgTypeTag.String,
+        .mandatory = true,
+    },
+    .{
+        .name = TailFlags.Lines,
+        .short = 'n',
+        .kind = opt.ArgTypeTag.String,
+        .mandatory = true,
+    },
+};
+
+const PrintOptions = enum {
+    Full,
+    Lines,
+    Bytes,
+};
+
+pub fn main() !void {
+    // out of memory panic
+    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
+        try stdout.print("Out of memory: {}\n", .{err});
+        return;
+    };
+    defer std.process.argsFree(std.heap.page_allocator, args);
+
+    var opts: PrintOptions = PrintOptions.Full;
+
+    var length: []u8 = undefined;
+
+    var it = opt.FlagIterator(TailFlags).init(flags[0..], args);
+    while (it.next_flag() catch {
+        return;
+    }) |flag| {
+        switch (flag.name) {
+            TailFlags.Help => {
+                warn("(help screen here)\n", .{});
+                return;
+            },
+            TailFlags.Version => {
+                warn("(version info here)\n", .{});
+                return;
+            },
+            TailFlags.Bytes => {
+                opts = PrintOptions.Bytes;
+                length = flag.value.String.?;
+            },
+            TailFlags.Lines => {
+                opts = PrintOptions.Lines;
+                length = flag.value.String.?;
+            },
+        }
     }
 
-    // must be a number
-    const n = std.fmt.parseInt(u32, args[2], 10) catch |err| {
-        try stdout.print("Error: second arg must be a number!\n", .{});
-        return 1;
-    };
+    var n: u32 = 10;
+    if (opts != PrintOptions.Full) n = try str_to_n(length[0..]);
 
-    // run command
-    tail(n, args[1]) catch |err| {
-        try stdout.print("Error: {}\n", .{err});
-        return 1;
-    };
+    var files = std.ArrayList([]u8).init(std.heap.page_allocator);
+    while (it.next_arg()) |file_name| {
+        try files.append(file_name);
+    }
 
-    return 0;
+    if (files.len > 0) {
+        for (files.toSliceConst()) |file_name| {
+            const file = std.fs.File.openRead(file_name[0..]) catch |err| {
+                try stdout.print("Error: cannot open file {}\n", .{file_name});
+                return;
+            };
+            if (files.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
+            try tail(n, file, opts == PrintOptions.Bytes);
+        }
+    } else {
+        const file = std.io.getStdIn();
+        try alt_tail(n, file, opts == PrintOptions.Bytes);
+        file.close();
+    }
 }
