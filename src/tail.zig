@@ -66,12 +66,14 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
         }
     } else |err| return err;
 
+    var new_n: u32 = if (first_time) i else n;
+
     var x: u32 = top;
     if (!is_bytes) {
         i = 0;
-        while ((i == 0 or x != top) and i <= n) : (x += 1) {
+        while ((i == 0 or x != top) and i <= new_n) : (x += 1) {
             // loop buffer location around
-            if (x >= n) x = 0;
+            if (x >= new_n) x = 0;
             try stdout.print("{}\n", .{lines[x]});
             i += 1;
         }
@@ -81,17 +83,19 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
         // find starting point
         var bytes_ate: usize = 0;
         var start_pos: usize = 0;
-        while (x != top) : (x -= 1) {
+        while (x != top + 1 or bytes_ate == 0) : (x -= 1) {
             bytes_ate += lines[x].len + 1;
             if (bytes_ate >= n) {
                 start_pos = bytes_ate - n;
                 break;
             }
+            if (x <= 0) x = new_n;
         }
 
         // print till end
         while (x != top) : (x += 1) {
-            if (x >= n) x = 0;
+            if (x >= new_n) x = 0;
+            if (!first_time and x > top) break;
             try stdout.print("{}\n", .{lines[x][start_pos..]});
             start_pos = 0;
         }
@@ -197,30 +201,22 @@ const PrintOptions = enum {
     Bytes,
 };
 
-pub fn main() !void {
-    // out of memory panic
-    const args = std.process.argsAlloc(std.heap.page_allocator) catch |err| {
-        try stdout.print("Out of memory: {}\n", .{err});
-        return;
-    };
-    defer std.process.argsFree(std.heap.page_allocator, args);
-
+pub fn main(args: [][]u8) anyerror!u8 {
     var opts: PrintOptions = PrintOptions.Full;
-
     var length: []u8 = undefined;
 
     var it = opt.FlagIterator(TailFlags).init(flags[0..], args);
     while (it.next_flag() catch {
-        return;
+        return 1;
     }) |flag| {
         switch (flag.name) {
             TailFlags.Help => {
                 warn("(help screen here)\n", .{});
-                return;
+                return 1;
             },
             TailFlags.Version => {
                 warn("(version info here)\n", .{});
-                return;
+                return 1;
             },
             TailFlags.Bytes => {
                 opts = PrintOptions.Bytes;
@@ -245,7 +241,7 @@ pub fn main() !void {
         for (files.toSliceConst()) |file_name| {
             const file = std.fs.File.openRead(file_name[0..]) catch |err| {
                 try stdout.print("Error: cannot open file {}\n", .{file_name});
-                return;
+                return 1;
             };
             if (files.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
             try tail(n, file, opts == PrintOptions.Bytes);
@@ -255,4 +251,5 @@ pub fn main() !void {
         try alt_tail(n, file, opts == PrintOptions.Bytes);
         file.close();
     }
+    return 0;
 }
