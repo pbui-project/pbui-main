@@ -32,50 +32,69 @@ pub fn tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     };
 }
 
+// for stdin reading
 pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     // check if user inputs illegal line number
     if (n <= 0) {
         try stdout.print("Error: illegal count: {}\n", .{n});
         return;
     }
+    const allocator = std.heap.c_allocator;
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
+    const lines = try allocator.alloc([]u8, n);
 
-    const allocator = &arena.allocator;
-
-    const lines = try allocator.alloc([1000]u8, n);
-
+    // make sure stuff is actually there in array in comparison later
     var lineBuf: [BUFSIZ]u8 = undefined;
 
     var i: u32 = 0;
 
     var top: u32 = 0; // oldest row
+    var first_time: bool = true;
 
+    // add lines to buffer
     while (file.inStream().stream.readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
         if (segment == null) break;
-        std.mem.copy(u8, lines[i][0..], segment.?);
-
-        // add \x00 to end of string
-        var x: usize = segment.?.len;
-        lines[i][segment.?.len] = '\x00';
-        while (x < 1000) : (x += 1) {
-            lines[i][x] = '\x00';
-        }
+        // dealloc if already exist
+        if (!first_time) allocator.free(lines[i]);
+        lines[i] = try allocator.alloc(u8, segment.?.len);
+        std.mem.copy(u8, lines[i], segment.?);
         i += 1;
         top = i; // i love top
         if (i >= n) {
             i = 0;
+            first_time = false;
         }
     } else |err| return err;
 
     var x: u32 = top;
-    try stdout.print("{}\n", .{lines[x]});
-    x += 1;
+    if (!is_bytes) {
+        i = 0;
+        while ((i == 0 or x != top) and i <= n) : (x += 1) {
+            // loop buffer location around
+            if (x >= n) x = 0;
+            try stdout.print("{}\n", .{lines[x]});
+            i += 1;
+        }
+    } else {
+        x -= 1; // go to bottom and work up
 
-    while (x != top) : (x += 1) {
-        if (x >= n) x = 0;
-        try stdout.print("{}\n", .{lines[x]});
+        // find starting point
+        var bytes_ate: usize = 0;
+        var start_pos: usize = 0;
+        while (x != top) : (x -= 1) {
+            bytes_ate += lines[x].len + 1;
+            if (bytes_ate >= n) {
+                start_pos = bytes_ate - n;
+                break;
+            }
+        }
+
+        // print till end
+        while (x != top) : (x += 1) {
+            if (x >= n) x = 0;
+            try stdout.print("{}\n", .{lines[x][start_pos..]});
+            start_pos = 0;
+        }
     }
 }
 
