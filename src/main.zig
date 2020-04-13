@@ -10,6 +10,7 @@ const tru = @import("true.zig");
 const head = @import("head.zig");
 const wc = @import("wc.zig");
 const zigsay = @import("zigsay.zig");
+const cat = @import("cat.zig");
 const std = @import("std");
 const stdout = &std.io.getStdOut().outStream().stream;
 const warn = std.debug.warn;
@@ -32,6 +33,7 @@ pub fn usage(args: [][]u8) anyerror!u8 {
         \\tail
         \\true
         \\zigsay
+        \\cat
         \\
     , .{});
 
@@ -61,6 +63,7 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("tail", tail.main);
     _ = try func_map.put("true", tru.main);
     _ = try func_map.put("wc", wc.main);
+    _ = try func_map.put("cat", cat.main);
     _ = try func_map.put("zigsay", zigsay.main);
 
     // check basename of exe
