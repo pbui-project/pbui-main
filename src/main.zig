@@ -13,6 +13,7 @@ const zigsay = @import("zigsay.zig");
 const cat = @import("cat.zig");
 const std = @import("std");
 const du = @import("du.zig");
+const uniq = @import("uniq.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
 const warn = std.debug.warn;
 const testing = std.testing;
@@ -36,6 +37,7 @@ pub fn usage(args: [][]u8) anyerror!u8 {
         \\zigsay
         \\cat
         \\du
+        \\uniq
         \\
     , .{});
 
@@ -68,6 +70,7 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("cat", cat.main);
     _ = try func_map.put("zigsay", zigsay.main);
     _ = try func_map.put("du", du.main);
+    _ = try func_map.put("uniq", uniq.main);
 
     // check basename of exe
     var buffer: [100]u8 = undefined;
