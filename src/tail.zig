@@ -1,7 +1,7 @@
 const std = @import("std");
 const opt = @import("opt.zig");
-const File = &std.io.getStdOut().outStream().stream;
-const stdout = &std.io.getStdOut().outStream().stream;
+const File = std.fs.File;
+const stdout = &std.io.getStdOut().outStream();
 const warn = std.debug.warn;
 const BUFSIZ: u16 = 4096;
 
@@ -19,14 +19,14 @@ pub fn tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
 
     // seek to start pos
     var seekable = std.fs.File.seekableStream(file);
-    seekable.stream.seekTo(printPos) catch |err| {
+    seekable.seekTo(printPos) catch |err| {
         try stdout.print("Error: cannot seek file: {}\n", .{err});
         return;
     };
 
     // print file from start pos
     var in_stream = std.fs.File.inStream(file);
-    print_stream(&in_stream.stream) catch |err| {
+    print_stream(&in_stream) catch |err| {
         try stdout.print("Error: cannot print file: {}\n", .{err});
         return;
     };
@@ -52,7 +52,7 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     var first_time: bool = true;
 
     // add lines to buffer
-    while (file.inStream().stream.readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
+    while (file.inStream().readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
         if (segment == null) break;
         // dealloc if already exist
         if (!first_time) allocator.free(lines[i]);
@@ -104,12 +104,12 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
 
 // Prints stream from current pointer to end of file in BUFSIZ
 // chunks.
-pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
+pub fn print_stream(stream: *std.fs.File.InStream) anyerror!void {
     var buffer: [BUFSIZ]u8 = undefined;
-    var size = try stream.readFull(&buffer);
+    var size = try stream.readAll(&buffer);
 
     // loop until EOF hit
-    while (size > 0) : (size = (try stream.readFull(&buffer))) {
+    while (size > 0) : (size = (try stream.readAll(&buffer))) {
         try stdout.print("{}", .{buffer[0..size]});
     }
 }
@@ -120,13 +120,13 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File, is_bytes: bool) anyerror!u
     var in_stream = std.fs.File.inStream(file);
 
     // Find ending position of file
-    var endPos: u64 = seekable.stream.getEndPos() catch |err| {
+    var endPos: u64 = seekable.getEndPos() catch |err| {
         try stdout.print("Error: cannot find endpos of file: {}\n", .{err});
         return err;
     };
 
     // set to EOF to step backwards from
-    seekable.stream.seekTo(endPos) catch |err| {
+    seekable.seekTo(endPos) catch |err| {
         try stdout.print("Error: cannot seek file: {}\n", .{err});
         return err;
     };
@@ -137,12 +137,12 @@ pub fn find_adjusted_start(n: u32, file: std.fs.File, is_bytes: bool) anyerror!u
     var char: u8 = undefined;
     while (amt_read < (n + 1) and offset < endPos) {
         offset += 1;
-        seekable.stream.seekTo(endPos - offset) catch |err| {
+        seekable.seekTo(endPos - offset) catch |err| {
             try stdout.print("Error: cannot seek: {}\n", .{err});
             return err;
         };
 
-        char = in_stream.stream.readByte() catch |err| {
+        char = in_stream.readByte() catch |err| {
             try stdout.print("Error: cannot read byte: {}\n", .{err});
             return err;
         };
@@ -237,13 +237,13 @@ pub fn main(args: [][]u8) anyerror!u8 {
         try files.append(file_name);
     }
 
-    if (files.len > 0) {
-        for (files.toSliceConst()) |file_name| {
-            const file = std.fs.File.openRead(file_name[0..]) catch |err| {
+    if (files.items.len > 0) {
+        for (files.items) |file_name| {
+            const file = std.fs.cwd().openFile(file_name[0..], File.OpenFlags{ .read = true, .write = false }) catch |err| {
                 try stdout.print("Error: cannot open file {}\n", .{file_name});
                 return 1;
             };
-            if (files.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
+            if (files.items.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
             try tail(n, file, opts == PrintOptions.Bytes);
             file.close();
         }

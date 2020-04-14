@@ -1,6 +1,6 @@
 const std = @import("std");
 const File = std.fs.File;
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
 
@@ -15,8 +15,6 @@ pub fn head(n: u32, file: std.fs.File, is_stdin: bool, is_bytes: bool) !void {
         return;
     }
 
-    var buffered_stream = std.io.BufferedInStream(std.fs.File.InStream.Error).init(&file.inStream().stream);
-
     // Init read buffer, used to store BUFSIZ input from readFull
     var buffer: [BUFSIZ]u8 = undefined;
 
@@ -27,9 +25,9 @@ pub fn head(n: u32, file: std.fs.File, is_stdin: bool, is_bytes: bool) !void {
     var bytes_read: usize = 0;
 
     // Read first chunk of stream & loop
-    var size = try buffered_stream.stream.readFull(&buffer);
+    var size = try file.readAll(&buffer);
     while (size > 0) : ({
-        size = (try buffered_stream.stream.readFull(&buffer));
+        size = (try file.readAll(&buffer));
         fast = 0;
         slow = 0;
     }) {
@@ -139,13 +137,16 @@ pub fn main(args: [][]u8) anyerror!u8 {
         try files.append(file_name);
     }
 
-    if (files.len > 0) {
-        for (files.toSliceConst()) |file_name| {
-            const file = std.fs.File.openRead(file_name[0..]) catch |err| {
+    if (files.items.len > 0) {
+        for (files.items) |file_name| {
+            const file = std.fs.cwd().openFile(file_name[0..], File.OpenFlags{
+                .read = true,
+                .write = false,
+            }) catch |err| {
                 try stdout.print("Error: cannot open file {}\n", .{file_name});
                 return 1;
             };
-            if (files.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
+            if (files.items.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
             // run command
             head(n, file, false, opts == PrintOptions.Bytes) catch |err| {
                 try stdout.print("Error: {}\n", .{err});

@@ -14,7 +14,7 @@ const cat = @import("cat.zig");
 const std = @import("std");
 const du = @import("du.zig");
 const uniq = @import("uniq.zig");
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 const warn = std.debug.warn;
 const testing = std.testing;
 const assert = @import("std").debug.assert;
@@ -45,7 +45,7 @@ pub fn usage(args: [][]u8) anyerror!u8 {
     return r;
 }
 
-var func_map = std.StringHashMap(fn ([][]u8) anyerror!u8).init(std.heap.direct_allocator);
+var func_map = std.StringHashMap(fn ([][]u8) anyerror!u8).init(std.heap.page_allocator);
 
 pub fn main() anyerror!u8 {
     const r: anyerror!u8 = 1;

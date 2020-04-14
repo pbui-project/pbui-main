@@ -1,7 +1,7 @@
 const std = @import("std");
 const opt = @import("opt.zig");
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 const warn = std.debug.warn;
 
 pub fn basename(path: []const u8, terminator: []const u8, suffix: ?[]u8, allocator: *Allocator) ![]u8 {

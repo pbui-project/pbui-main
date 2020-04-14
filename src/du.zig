@@ -2,7 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 const Allocator = std.mem.Allocator;
 
 const fstaterror = std.os.FStatError;
@@ -20,9 +20,9 @@ pub fn du(paths: std.ArrayList([]const u8), depth: u8, sz: SizeOptions) anyerror
     var f: std.fs.File = undefined;
     var size: u64 = 0;
     var total_size: u64 = 0;
-    if (paths.len > 0) {
-        for (paths.toSliceConst()) |file_name| {
-            if (std.fs.cwd().openDirList(file_name)) |dir| {
+    if (paths.items.len > 0) {
+        for (paths.items) |file_name| {
+            if (std.fs.cwd().openDir(file_name, std.fs.Dir.OpenDirOptions{ .access_sub_paths = true, .iterate = true })) |dir| {
                 var iter = dir.iterate();
 
                 var files = std.ArrayList([]const u8).init(std.heap.page_allocator);
@@ -68,7 +68,7 @@ fn concat_files(allocator: *Allocator, a: []const u8, b: []const u8) ![]u8 {
 }
 
 pub fn grab_allocated_memory(file: std.fs.File) !u64 {
-    if (builtin.os == .windows) {
+    if (builtin.os.tag == .windows) {
         var io_status_block: windows.IO_STATUS_BLOCK = undefined;
         var info: windows.FILE_ALL_INFORMATION = undefined;
         const rc = windows.ntdll.NtQueryInformationFile(file.handle, &io_status_block, &info, @sizeOf(windows.FILE_ALL_INFORMATION), .FileAllInformation);
