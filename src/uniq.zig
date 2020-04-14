@@ -116,7 +116,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             UniqFlags.Help => {
-                warn("TODO", .{});
+                warn("{} [-c | -d | -u ] [FILE_NAME]\n", .{args[0]});
                 return 0;
             },
             UniqFlags.Version => {
@@ -145,7 +145,8 @@ pub fn main(args: [][]u8) anyerror!u8 {
         try uniq(file, options);
         file.close();
     } else {
-        return 1;
+        // stdin
+        try uniq(std.io.getStdIn(), options);
     }
     return 0;
 }
