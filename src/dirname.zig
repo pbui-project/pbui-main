@@ -1,28 +1,75 @@
 const std = @import("std");
+const warn = std.debug.warn;
+const opt = @import("opt.zig");
 const stdout = &std.io.getStdOut().outStream().stream;
 
-pub fn dirname(paths: [][]const u8, zero: bool) !void {
+pub fn dirname(paths: std.ArrayList([]u8), zero: bool) !void {
     // dirname calls dirnameposix if not windows... more robust
-    // to just use basename
+    // to just use Dirname
     const terminator: u8 = if (zero) '\x00' else '\n';
 
     // loop through paths and call dirname
-    var i: usize = 0;
     var name: ?[]const u8 = null;
-    while (i < paths.len) : (i += 1) {
-        name = std.fs.path.dirname(paths[i]) orelse ".";
+    for (paths.toSliceConst()) |path| {
+        name = std.fs.path.dirname(path) orelse ".";
 
         try stdout.print("{}{c}", .{ name, terminator });
     }
 }
 
+const DirnameFlags = enum {
+    Zero,
+    Help,
+    Version,
+};
+
+var flags = [_]opt.Flag(DirnameFlags){
+    .{
+        .name = DirnameFlags.Help,
+        .long = "help",
+    },
+    .{
+        .name = DirnameFlags.Version,
+        .long = "version",
+    },
+    .{
+        .name = DirnameFlags.Zero,
+        .short = 'z',
+        .long = "zero",
+    },
+};
+
 pub fn main(args: [][]u8) anyerror!u8 {
-    // check len of args
-    if (args.len < 2) {
-        try stdout.print("usage: ./dirname FILENAME...\n", .{});
-        return 1;
+    var zero: bool = false;
+
+    var it = opt.FlagIterator(DirnameFlags).init(flags[0..], args);
+    while (it.next_flag() catch {
+        return 0;
+    }) |flag| {
+        switch (flag.name) {
+            DirnameFlags.Help => {
+                warn("dirname FILE_NAME\n", .{});
+                return 0;
+            },
+            DirnameFlags.Version => {
+                warn("(version info here)\n", .{});
+                return 0;
+            },
+            DirnameFlags.Zero => {
+                zero = true;
+            },
+        }
     }
-    // run command
-    try dirname(args[1..], false);
-    return 0;
+
+    var files = std.ArrayList([]u8).init(std.heap.page_allocator);
+    while (it.next_arg()) |file_name| {
+        try files.append(file_name);
+    }
+
+    if (files.len > 0) {
+        try dirname(files, zero);
+        return 0;
+    }
+    warn("dirname FILE_NAME\n", .{});
+    return 1;
 }
