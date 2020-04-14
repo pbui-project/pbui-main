@@ -1,8 +1,8 @@
 const std = @import("std");
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 
 pub fn remove(name: []const u8) !void {
-    std.fs.deleteTree(name) catch |err| {
+    std.fs.cwd().deleteTree(name) catch |err| {
         try stdout.print("Error Removing Object: {}\n", .{err});
         return;
     };

@@ -2,7 +2,7 @@ const std = @import("std");
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 
 /// Print uniq adjacent lines... no flags yet
 pub fn uniq(file: std.fs.File, options: PrintOptions) !void {
@@ -55,10 +55,10 @@ pub fn get_line(allocator: *Allocator, file: std.fs.File) ![]u8 {
     var stream = std.fs.File.inStream(file);
     var i: u64 = 0;
 
-    char = try stream.stream.readByte(); // err if no stream
+    char = try stream.readByte(); // err if no stream
     var buffer: []u8 = try allocator.alloc(u8, 0);
 
-    while (char != -1) : (char = stream.stream.readByte() catch {
+    while (char != -1) : (char = stream.readByte() catch {
         return buffer;
     }) {
         if (char == '\n') break;
@@ -138,7 +138,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     var input = it.next_arg();
 
     if (input) |name| {
-        const file = std.fs.File.openRead(name[0..]) catch |err| {
+        const file = std.fs.cwd().openFile(name[0..], std.fs.File.OpenFlags{ .read = true, .write = false }) catch |err| {
             try stdout.print("Error: cannot open file {}\n", .{name});
             return 1;
         };

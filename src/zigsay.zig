@@ -1,7 +1,7 @@
 const std = @import("std");
 const opt = @import("opt.zig");
-const stdout = &std.io.getStdOut().outStream().stream;
-const stdin = &std.io.getStdIn().inStream().stream;
+const stdout = &std.io.getStdOut().outStream();
+const stdin = &std.io.getStdIn().inStream();
 
 const VERSION = "0.0.1";
 
@@ -22,7 +22,7 @@ const ZIGUANA =
     \\          .'  `.    .'  `.
     \\          |/\/\|    |/\/\|
     \\jro
-    ;
+;
 
 const ZigsayFlags = enum {
     Help,
@@ -43,19 +43,16 @@ var flags = [_]opt.Flag(ZigsayFlags){
 };
 
 fn read_stdin(allocator: *std.mem.Allocator) ![]u8 {
-    // open stdin in a buffered stream
-    var buffered_stream = std.io.BufferedInStream(std.fs.File.InStream.Error).init(stdin);
-
     // initialize read and input buffer
     var read_buffer: [BUFSIZE]u8 = undefined;
 
-    var input_buffer = try std.Buffer.init(allocator, "");
+    var input_buffer = std.ArrayList(u8).init(allocator);
     defer input_buffer.deinit();
 
     // read input into read_buffer, appending to input_buffer
-    var size = try buffered_stream.stream.readFull(&read_buffer);
-    while (size > 0) : (size = try buffered_stream.stream.readFull(&read_buffer)) {
-        try input_buffer.append(read_buffer[0..size]);
+    var size = try stdin.readAll(&read_buffer);
+    while (size > 0) : (size = try stdin.readAll(&read_buffer)) {
+        try input_buffer.insertSlice(input_buffer.items.len, read_buffer[0..size]);
     }
 
     return input_buffer.toOwnedSlice();
@@ -63,13 +60,13 @@ fn read_stdin(allocator: *std.mem.Allocator) ![]u8 {
 
 fn concat(words: [][]u8, allocator: *std.mem.Allocator) ![]u8 {
     // initialize line buffer
-    var result_buffer = try std.Buffer.init(allocator, "");
+    var result_buffer = std.ArrayList(u8).init(allocator);
     defer result_buffer.deinit();
 
     for (words) |word, i| {
         if (i != 0)
-            try result_buffer.append(" ");
-        try result_buffer.append(word);
+            try result_buffer.append(' ');
+        try result_buffer.insertSlice(result_buffer.items.len, word);
     }
 
     return result_buffer.toOwnedSlice();
@@ -81,7 +78,7 @@ fn wrap(s: []u8, allocator: *std.mem.Allocator) ![][]u8 {
     defer result.deinit();
 
     // initialize line buffer
-    var line_buffer = try std.Buffer.init(allocator, "");
+    var line_buffer = std.ArrayList(u8).init(allocator);
     defer line_buffer.deinit();
 
     // initialize iterator and word and line start
@@ -91,29 +88,29 @@ fn wrap(s: []u8, allocator: *std.mem.Allocator) ![][]u8 {
     // push words into line buffer, and line buffer into result list
     while (iterator < s.len) : (iterator += 1) {
         if ((iterator + 1 == s.len and !std.fmt.isWhiteSpace(s[iterator])) or
-            (iterator + 1 < s.len and std.fmt.isWhiteSpace(s[iterator + 1]))) {
-
+            (iterator + 1 < s.len and std.fmt.isWhiteSpace(s[iterator + 1])))
+        {
             if (word_start != iterator + 1) { // end of word, not a leading whitespace
-                if (line_buffer.len() > 0 and line_buffer.len() + (iterator - word_start + 2) > MAXLEN) {
+                if (line_buffer.items.len > 0 and line_buffer.items.len + (iterator - word_start + 2) > MAXLEN) {
                     // new line, since we cant fit more words
                     try result.append(line_buffer.toOwnedSlice());
                     try line_buffer.resize(0);
                 }
 
-                if (line_buffer.len() > 0)
-                    try line_buffer.append(" ");
+                if (line_buffer.items.len > 0)
+                    try line_buffer.append(' ');
 
-                try line_buffer.append(s[word_start..(iterator+1)]);
+                try line_buffer.insertSlice(line_buffer.items.len, s[word_start..(iterator + 1)]);
 
                 // word appended is larger than MAXLEN characters, append parts now
-                if (line_buffer.len() > MAXLEN) {
+                if (line_buffer.items.len > MAXLEN) {
                     var line = line_buffer.toOwnedSlice();
                     var blk: usize = 0;
                     while (line.len - blk * MAXLEN >= MAXLEN) : (blk += 1)
-                        try result.append(line[blk*MAXLEN..(blk+1)*MAXLEN]);
+                        try result.append(line[blk * MAXLEN .. (blk + 1) * MAXLEN]);
 
                     try line_buffer.resize(0); // fix ownedSlice()
-                    try line_buffer.append(line[blk*MAXLEN..]);
+                    try line_buffer.insertSlice(line_buffer.items.len, line[blk * MAXLEN ..]);
                 }
             }
 
@@ -123,7 +120,7 @@ fn wrap(s: []u8, allocator: *std.mem.Allocator) ![][]u8 {
         }
     }
 
-    if (line_buffer.len() > 0) {
+    if (line_buffer.items.len > 0) {
         try result.append(line_buffer.toOwnedSlice());
     }
 
@@ -165,7 +162,7 @@ fn print_dialog_box(lines: [][]u8, allocator: *std.mem.Allocator) !void {
             end_char = '/';
         }
 
-        try stdout.print("{c} {} ", .{start_char, line});
+        try stdout.print("{c} {} ", .{ start_char, line });
         if (line.len < max_len)
             try print_repeat(' ', max_len - line.len, false, allocator);
         try stdout.print("{c}\n", .{end_char});
@@ -188,7 +185,7 @@ pub fn zigsay(input: []u8, allocator: *std.mem.Allocator) !void {
     try stdout.print(ZIGUANA, .{});
 }
 
-pub fn main(args: [][]u8) anyerror! u8{
+pub fn main(args: [][]u8) anyerror!u8 {
     // parse arguments
     var it = opt.FlagIterator(ZigsayFlags).init(flags[0..], args);
     while (it.next_flag() catch {
@@ -222,4 +219,3 @@ pub fn main(args: [][]u8) anyerror! u8{
 
     return 0;
 }
-

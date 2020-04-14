@@ -1,14 +1,14 @@
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
 const std = @import("std");
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 
 const BUFSIZ: u16 = 4096;
 
 pub fn cat(file: std.fs.File) !void {
     // print file from start pos
     var in_stream = std.fs.File.inStream(file);
-    print_stream(&in_stream.stream) catch |err| {
+    print_stream(&in_stream) catch |err| {
         try stdout.print("Error: cannot print file: {}\n", .{err});
         return;
     };
@@ -17,12 +17,12 @@ pub fn cat(file: std.fs.File) !void {
 // TODO add this to a library (used in tail also)
 // Prints stream from current pointer to end of file in BUFSIZ
 // chunks.
-pub fn print_stream(stream: *std.fs.File.InStream.Stream) anyerror!void {
+pub fn print_stream(stream: *std.fs.File.InStream) anyerror!void {
     var buffer: [BUFSIZ]u8 = undefined;
-    var size = try stream.readFull(&buffer);
+    var size = try stream.readAll(&buffer);
 
     // loop until EOF hit
-    while (size > 0) : (size = (try stream.readFull(&buffer))) {
+    while (size > 0) : (size = (try stream.readAll(&buffer))) {
         try stdout.print("{}", .{buffer[0..size]});
     }
 }
@@ -65,9 +65,9 @@ pub fn main(args: [][]u8) anyerror!u8 {
         try files.append(file_name);
     }
 
-    if (files.len > 0) {
-        for (files.toSliceConst()) |file_name| {
-            const file = std.fs.File.openRead(file_name[0..]) catch |err| {
+    if (files.items.len > 0) {
+        for (files.items) |file_name| {
+            const file = std.fs.cwd().openFile(file_name[0..], std.fs.File.OpenFlags{ .read = true, .write = false }) catch |err| {
                 try stdout.print("Error: cannot open file {}\n", .{file_name});
                 return 1;
             };

@@ -1,8 +1,8 @@
 const std = @import("std");
-const stdout = &std.io.getStdOut().outStream().stream;
+const stdout = &std.io.getStdOut().outStream();
 
 pub fn makeDirectory(name: []const u8) !void {
-    std.fs.makeDir(name) catch |err| {
+    std.fs.cwd().makeDir(name) catch |err| {
         try stdout.print("Error Creating Directory: {}\n", .{err});
         return;
     };
