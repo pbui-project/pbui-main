@@ -27,7 +27,7 @@ pub fn du(paths: std.ArrayList([]const u8), depth: u8, sz: SizeOptions) anyerror
 
                 var files = std.ArrayList([]const u8).init(std.heap.page_allocator);
                 while (try iter.next()) |item| {
-                    var new_name = try concat_files(std.heap.c_allocator, file_name, item.name);
+                    var new_name = try concat_files(std.heap.page_allocator, file_name, item.name);
                     try files.append(new_name);
                 }
                 //try stdout.print("calling du\n", .{});

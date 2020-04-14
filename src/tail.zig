@@ -39,7 +39,7 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
         try stdout.print("Error: illegal count: {}\n", .{n});
         return;
     }
-    const allocator = std.heap.c_allocator;
+    const allocator = std.heap.page_allocator;
 
     const lines = try allocator.alloc([]u8, n);
 
