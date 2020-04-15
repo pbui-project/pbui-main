@@ -162,3 +162,12 @@ pub fn main(args: [][]u8) anyerror!u8 {
     var total = try du(files, 0, user_size);
     return 0;
 }
+
+test "total size of LICENSE" {
+    var paths = std.ArrayList([]const u8).init(std.heap.page_allocator);
+    try paths.append("LICENSE");
+    var ret = try du(paths, 0, SizeOptions.Bytes);
+
+    // WILL BREAK IF WE CHANGE LICENSE
+    std.debug.assert(ret == 72 * 512 * 8);
+}
