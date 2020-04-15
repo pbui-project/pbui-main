@@ -29,12 +29,14 @@ pub fn main(args: [][]u8) anyerror!u8 {
 }
 
 test "see if dir was made" {
-    _ = try std.fs.cwd().deleteDir("/tmp/testmkdir");
+    _ = std.fs.cwd().deleteDir("/tmp/testmkdir") catch |err| void;
     try makeDirectory("/tmp/testmkdir");
 
-    var ret = std.fs.cwd().openDir("/tmp/testmkdir", std.fs.Dir.OpenDirOptions{});
-
-    if (ret) |dir| {} else |err| {
-        std.debug.assert(false);
-    }
+    var ret = std.fs.cwd().openDir("/tmp/testmkdir", .{}) catch |err| switch (err) {
+        error.NotDir => return error.NotDir,
+        else => {
+            std.debug.assert(false);
+            return error.FileSystem;
+        },
+    };
 }
