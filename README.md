@@ -57,6 +57,7 @@ For a list of applets, run `./pbui` or `./pbui -h`.  Currently supported applets
   - `du`
   - `uniq`
   - `shuf`
+  - `sha1`
 
 To run a given applet, use: `./pbui [APPLET] [arguments]`.
   

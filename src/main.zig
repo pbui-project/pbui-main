@@ -15,6 +15,7 @@ const std = @import("std");
 const du = @import("du.zig");
 const uniq = @import("uniq.zig");
 const shuf = @import("shuf.zig");
+const sha1 = @import("sha1.zig");
 const stdout = &std.io.getStdOut().outStream();
 const warn = std.debug.warn;
 const testing = std.testing;
@@ -40,6 +41,7 @@ pub fn usage(args: [][]u8) anyerror!u8 {
         \\du
         \\uniq
         \\shuf
+        \\sha1
         \\
     , .{});
 
@@ -75,6 +77,7 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("uniq", uniq.main);
     //_ = try func_map.put("ls", ls.main);
     _ = try func_map.put("shuf", shuf.main);
+    _ = try func_map.put("sha1", sha1.main);
 
     // check basename of exe
     var buffer: [100]u8 = undefined;
