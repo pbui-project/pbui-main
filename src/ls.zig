@@ -7,9 +7,7 @@ fn show_file(path: []const u8) void {
 fn show_directory(path: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
-
     const allocator = &arena.allocator;
-
     var dents = std.ArrayList([]const u8).init(allocator);
     defer dents.deinit();
 
@@ -24,22 +22,20 @@ fn show_directory(path: []const u8) !void {
         }
         std.fs.Dir.close(&dir);
     } else |err| {
-        if(err == error.NotDir) show_file(path);
+        if (err == error.NotDir) show_file(path);
         return;
     }
-
 }
 
 pub fn main(args: [][]u8) anyerror!u8 {
-
     if (args.len > 1) {
         for (args) |arg, i| {
             if (i != 0) {
                 const result = show_directory(arg);
             }
         }
-    } else const result = show_directory(".");
-
+    } else {
+        const result = show_directory(".");
+    }
     return 0;
-
 }
