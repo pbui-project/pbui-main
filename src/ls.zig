@@ -1,6 +1,8 @@
 const std = @import("std");
 const opt = @import("opt.zig");
+const warn = std.debug.warn;
 
+//Globals for flags
 var ALPHA: bool = false;
 var RECUR: bool = false;
 var ALL: bool = false;
@@ -21,10 +23,12 @@ var flags = [_]opt.Flag(lsFlags){
     .{
         .name = lsFlags.All,
         .short = 'a',
+        .long = "All",
     },
     .{
         .name = lsFlags.Recursive,
-        .short = 'r',
+        .short = 'R',
+        .long = "Recursive",
     },
     .{
         .name = lsFlags.Alpha,
@@ -33,18 +37,22 @@ var flags = [_]opt.Flag(lsFlags){
     },
 };
 
+// Function for displaying just a filename
 fn show_file(path: []const u8) void {
-    std.debug.warn("{}\n", .{path});
+    warn("{}\n", .{path});
 }
 
+// Function to print the tabs utilized in recursive ls
 fn printTabs(tabn: usize) void {
     var n: usize = tabn;
     while (n > 0) {
-        std.debug.warn("  ", .{});
+        warn("   ", .{});
         n = n - 1;
     }
 }
 
+// Function to compare two words, regardless of case
+// Returning true means first word < second word, and vice versa
 pub fn compare_words(word1: []const u8, word2: []const u8) bool {
     var maxlen: usize = 0;
     var w: bool = false;
@@ -78,9 +86,11 @@ pub fn compare_words(word1: []const u8, word2: []const u8) bool {
         maxlen = maxlen - 1;
     }
 
-    return w;
+    return w; // In case words are equal through end of one, i.e. file and files
 }
 
+// Function to sort a list alphabetically, then print it
+// Hopefully in future port this to just work with all ArrayLists and not be ls specific
 pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
@@ -113,7 +123,7 @@ pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
         if (ALL == true or entry.name[0] != '.') {
             if (entry.kind == std.fs.Dir.Entry.Kind.Directory) {
                 printTabs(TABS);
-                std.debug.warn("{}/\n", .{entry.name});
+                warn("{}/\n", .{entry.name});
                 if (RECUR) {
                     TABS = TABS + 1;
                     const ret = show_directory(entry.name);
@@ -121,7 +131,7 @@ pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
                 }
             } else {
                 printTabs(TABS);
-                std.debug.warn("{}\n", .{entry.name});
+                warn("{}\n", .{entry.name});
             }
         }
     }
@@ -129,6 +139,7 @@ pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
     return;
 }
 
+//Function to open directory and list its entries
 fn show_directory(path: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
@@ -145,7 +156,12 @@ fn show_directory(path: []const u8) !void {
             try dents.append(entry);
         }
 
-        if (ALL == true) std.debug.warn(".\n..\n", .{});
+        if (ALL == true) {
+            printTabs(TABS);
+            warn(".\n", .{});
+            printTabs(TABS);
+            warn("..\n", .{});
+        }
         if (ALPHA == true) {
             const ret = alpha_ArrayList(dents);
         } else {
@@ -153,7 +169,7 @@ fn show_directory(path: []const u8) !void {
                 if (ALL == true or entry.name[0] != '.') {
                     if (entry.kind == std.fs.Dir.Entry.Kind.Directory) {
                         printTabs(TABS);
-                        std.debug.warn("{}/\n", .{entry.name});
+                        warn("{}/\n", .{entry.name});
                         if (RECUR) {
                             TABS = TABS + 1;
                             const ret = show_directory(entry.name);
@@ -161,7 +177,7 @@ fn show_directory(path: []const u8) !void {
                         }
                     } else {
                         printTabs(TABS);
-                        std.debug.warn("{}\n", .{entry.name});
+                        warn("{}\n", .{entry.name});
                     }
                 }
             }
@@ -173,6 +189,7 @@ fn show_directory(path: []const u8) !void {
     }
 }
 
+// Main funtion serving to parse flags and call appropriate funtions
 pub fn main(args: [][]u8) anyerror!u8 {
     var it = opt.FlagIterator(lsFlags).init(flags[0..], args);
     while (it.next_flag() catch {
@@ -180,7 +197,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             lsFlags.Help => {
-                std.debug.warn("Usgae: ls FLAGS DIRECTORIES\n", .{});
+                warn("Usgae: ls FLAGS DIRECTORIES\n", .{});
                 return 1;
             },
             lsFlags.All => {
@@ -201,10 +218,16 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }
 
     if (dirs.items.len > 0) {
-        for (dirs.items) |arg| {
+        for (dirs.items) |arg, i| {
+            if (dirs.items.len > 1) {
+                warn("{}:\n", .{arg});
+            }
             const result = show_directory(arg);
+            if (dirs.items.len != i + 1) {
+                warn("\n", .{});
+            }
         }
-    } else {
+    } else { // If no directory specified, print current directory
         const result = show_directory(".");
     }
 
