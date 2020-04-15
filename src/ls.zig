@@ -4,6 +4,7 @@ const opt = @import("opt.zig");
 var ALPHA: bool = false;
 var RECUR: bool = false;
 var ALL: bool = false;
+var TABS: usize = 0;
 
 const lsFlags = enum {
     All,
@@ -31,6 +32,18 @@ var flags = [_]opt.Flag(lsFlags){
         .long = "Alpha",
     },
 };
+
+fn show_file(path: []const u8) void {
+    std.debug.warn("{}\n", .{path});
+}
+
+fn printTabs(tabn: usize) void {
+    var n: usize = tabn;
+    while (n > 0) {
+        std.debug.warn("  ", .{});
+        n = n - 1;
+    }
+}
 
 pub fn compare_words(word1: []const u8, word2: []const u8) bool {
     var maxlen: usize = 0;
@@ -99,18 +112,21 @@ pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
     for (newList.items) |entry| {
         if (ALL == true or entry.name[0] != '.') {
             if (entry.kind == std.fs.Dir.Entry.Kind.Directory) {
+                printTabs(TABS);
                 std.debug.warn("{}/\n", .{entry.name});
+                if (RECUR) {
+                    TABS = TABS + 1;
+                    const ret = show_directory(entry.name);
+                    TABS = TABS - 1;
+                }
             } else {
+                printTabs(TABS);
                 std.debug.warn("{}\n", .{entry.name});
             }
         }
     }
 
     return;
-}
-
-fn show_file(path: []const u8) void {
-    std.debug.warn("{}\n", .{path});
 }
 
 fn show_directory(path: []const u8) !void {
@@ -136,8 +152,15 @@ fn show_directory(path: []const u8) !void {
             for (dents.items) |entry| {
                 if (ALL == true or entry.name[0] != '.') {
                     if (entry.kind == std.fs.Dir.Entry.Kind.Directory) {
+                        printTabs(TABS);
                         std.debug.warn("{}/\n", .{entry.name});
+                        if (RECUR) {
+                            TABS = TABS + 1;
+                            const ret = show_directory(entry.name);
+                            TABS = TABS - 1;
+                        }
                     } else {
+                        printTabs(TABS);
                         std.debug.warn("{}\n", .{entry.name});
                     }
                 }
