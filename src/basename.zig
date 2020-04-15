@@ -120,3 +120,15 @@ pub fn main(args: [][]u8) anyerror!u8 {
 
     return 0;
 }
+
+test "simple test" {
+    const expected = "testbasename";
+
+    // "touch" file
+    const file = try std.fs.cwd().createFile("/tmp/testbasename", std.fs.File.CreateFlags{ .read = true });
+    file.close();
+
+    var result = try basename("/tmp/testbasename", "", null, std.heap.page_allocator);
+
+    std.debug.assert(std.mem.eql(u8, result, expected));
+}

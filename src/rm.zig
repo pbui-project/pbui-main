@@ -27,3 +27,14 @@ pub fn main(args: [][]u8) anyerror!u8 {
 
     return 0;
 }
+
+test "see if file got deleted" {
+    var ret = std.fs.cwd().createFile("/tmp/testrm", std.fs.File.CreateFlags{});
+
+    try remove("/tmp/testrm");
+
+    var file = std.fs.cwd().access("/tmp/testrm", .{}) catch |err| switch (err) {
+        error.FileNotFound => std.debug.assert(true),
+        else => std.debug.assert(false),
+    };
+}

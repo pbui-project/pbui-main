@@ -1,7 +1,7 @@
 const basename = @import("basename.zig");
 const dirname = @import("dirname.zig");
 const fls = @import("false.zig");
-const ls = @import("ls.zig");
+//const ls = @import("ls.zig");
 const mkdir = @import("mkdir.zig");
 const rm = @import("rm.zig");
 const sleep = @import("sleep.zig");
@@ -14,6 +14,8 @@ const cat = @import("cat.zig");
 const std = @import("std");
 const du = @import("du.zig");
 const uniq = @import("uniq.zig");
+const shuf = @import("shuf.zig");
+const sha1 = @import("sha1.zig");
 const stdout = &std.io.getStdOut().outStream();
 const warn = std.debug.warn;
 const testing = std.testing;
@@ -38,6 +40,8 @@ pub fn usage(args: [][]u8) anyerror!u8 {
         \\cat
         \\du
         \\uniq
+        \\shuf
+        \\sha1
         \\
     , .{});
 
@@ -71,7 +75,9 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("zigsay", zigsay.main);
     _ = try func_map.put("du", du.main);
     _ = try func_map.put("uniq", uniq.main);
-    _ = try func_map.put("ls", ls.main);
+    //_ = try func_map.put("ls", ls.main);
+    _ = try func_map.put("shuf", shuf.main);
+    _ = try func_map.put("sha1", sha1.main);
 
     // check basename of exe
     var buffer: [100]u8 = undefined;
@@ -98,5 +104,5 @@ pub fn main() anyerror!u8 {
 }
 
 test "Test assertion: addition" {
-    testing.expect(add(3, 7) == 10);
+    std.debug.assert(3 + 7 == 10);
 }

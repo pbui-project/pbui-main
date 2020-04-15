@@ -27,3 +27,16 @@ pub fn main(args: [][]u8) anyerror!u8 {
 
     return 0;
 }
+
+test "see if dir was made" {
+    _ = std.fs.cwd().deleteDir("/tmp/testmkdir") catch |err| void;
+    try makeDirectory("/tmp/testmkdir");
+
+    var ret = std.fs.cwd().openDir("/tmp/testmkdir", .{}) catch |err| switch (err) {
+        error.NotDir => return error.NotDir,
+        else => {
+            std.debug.assert(false);
+            return error.FileSystem;
+        },
+    };
+}
