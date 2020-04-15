@@ -144,7 +144,6 @@ fn show_directory(path: []const u8) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     const allocator = &arena.allocator;
-   
 
     var dents = std.ArrayList(std.fs.Dir.Entry).init(allocator);
 
@@ -192,7 +191,6 @@ fn show_directory(path: []const u8) !void {
 
 // Main funtion serving to parse flags and call appropriate funtions
 pub fn main(args: [][]u8) anyerror!u8 {
-
     var it = opt.FlagIterator(lsFlags).init(flags[0..], args);
     while (it.next_flag() catch {
         return 1;
@@ -232,8 +230,6 @@ pub fn main(args: [][]u8) anyerror!u8 {
     } else { // If no directory specified, print current directory
         const result = show_directory(".");
     }
-
-
 
     return 0;
 }
