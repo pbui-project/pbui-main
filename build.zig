@@ -35,6 +35,9 @@ pub fn build(b: *Builder) void {
     var sha1_tests = b.addTest("src/sha1.zig");
     sha1_tests.setBuildMode(mode);
 
+    var sort_tests = b.addTest("src/sort.zig");
+    sort_tests.setBuildMode(mode);
+
     const test_step = b.step("test", "Run library tests");
     test_step.dependOn(&main_tests.step);
     test_step.dependOn(&shuf_tests.step);
@@ -43,4 +46,5 @@ pub fn build(b: *Builder) void {
     test_step.dependOn(&mkdir_tests.step);
     test_step.dependOn(&rm_tests.step);
     test_step.dependOn(&sha1_tests.step);
+    test_step.dependOn(&sort_tests.step);
 }
