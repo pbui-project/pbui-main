@@ -75,7 +75,7 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("zigsay", zigsay.main);
     _ = try func_map.put("du", du.main);
     _ = try func_map.put("uniq", uniq.main);
-    //_ = try func_map.put("ls", ls.main);
+    _ = try func_map.put("ls", ls.main);
     _ = try func_map.put("shuf", shuf.main);
     _ = try func_map.put("sha1", sha1.main);
 
