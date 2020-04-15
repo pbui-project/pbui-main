@@ -61,4 +61,11 @@ For a list of applets, run `./pbui` or `./pbui -h`.  Currently supported applets
   - `sort`
 
 To run a given applet, use: `./pbui [APPLET] [arguments]`.
-  
+
+### Running applets individually
+
+To run applets individually, you can use `ln -s path/to/repository/zig-cache/bin/pbui APPLET_NAME`.
+
+Then, you can execute the symlink, removing the need to prefix with "./pbui". You can even replace your default shell's applets with ours if you want less functionality but more zig!
+
+![Example](https://chadpaste.com/f/cgo.13)
