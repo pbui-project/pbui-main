@@ -101,5 +101,5 @@ test "hash on license" {
     var file = try std.fs.cwd().openFile("LICENSE", std.fs.File.OpenFlags{ .read = true });
     var result = try sha1(std.heap.page_allocator, file);
 
-    std.debug.assert(std.mem.eql(u8, result[0..], "8624bcdae55baeef00cd11d5dfcfa60f68710a02"));
+    std.debug.assert(std.mem.eql(u8, result[0..], "2b5c4a97ba0ed7175825ab99052952111ddcd1db"));
 }
