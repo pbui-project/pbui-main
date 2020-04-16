@@ -172,7 +172,7 @@ fn print_dialog_box(lines: [][]u8, allocator: *std.mem.Allocator) !void {
 }
 
 pub fn zigsay(input: []u8, allocator: *std.mem.Allocator) !void {
-    // necessary due to iguana drawing being too long
+    // necessary due to Ziguana drawing being too long
     @setEvalBranchQuota(1500);
 
     // wrap to create dialogue box
