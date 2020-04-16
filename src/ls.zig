@@ -39,6 +39,7 @@ var flags = [_]opt.Flag(lsFlags){
 
 // Function for displaying just a filename
 fn show_file(path: []const u8) void {
+    printTabs(TABS);
     warn("{}\n", .{path});
 }
 
