@@ -169,5 +169,5 @@ test "total size of LICENSE" {
     var ret = try du(paths, 0, SizeOptions.Bytes);
 
     // WILL BREAK IF WE CHANGE LICENSE
-    std.debug.assert(ret == 72 * 512 * 8);
+    std.debug.assert(ret == 8 * 512 * 8);
 }
