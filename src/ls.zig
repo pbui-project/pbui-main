@@ -121,17 +121,11 @@ pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
 
     for (newList.items) |entry| {
         if (ALL == true or entry.name[0] != '.') {
-            if (entry.kind == std.fs.Dir.Entry.Kind.Directory) {
-                printTabs(TABS);
-                warn("{}/\n", .{entry.name});
-                if (RECUR) {
-                    TABS = TABS + 1;
-                    const ret = show_directory(entry.name);
-                    TABS = TABS - 1;
-                }
-            } else {
-                printTabs(TABS);
-                warn("{}\n", .{entry.name});
+            show_file(entry.name);
+            if (entry.kind == std.fs.Dir.Entry.Kind.Directory and RECUR) {
+                TABS = TABS + 1;
+                const ret = show_directory(entry.name);
+                TABS = TABS - 1;
             }
         }
     }
@@ -157,10 +151,8 @@ fn show_directory(path: []const u8) !void {
         }
 
         if (ALL == true) {
-            printTabs(TABS);
-            warn(".\n", .{});
-            printTabs(TABS);
-            warn("..\n", .{});
+            show_file(".");
+            show_file("..");
         }
         if (ALPHA == true) {
             const ret = alpha_ArrayList(dents);
@@ -168,23 +160,24 @@ fn show_directory(path: []const u8) !void {
             for (dents.items) |entry| {
                 if (ALL == true or entry.name[0] != '.') {
                     if (entry.kind == std.fs.Dir.Entry.Kind.Directory) {
-                        printTabs(TABS);
-                        warn("{}/\n", .{entry.name});
+                        show_file(entry.name);
                         if (RECUR) {
                             TABS = TABS + 1;
                             const ret = show_directory(entry.name);
                             TABS = TABS - 1;
                         }
                     } else {
-                        printTabs(TABS);
-                        warn("{}\n", .{entry.name});
+                        show_file(entry.name);
                     }
                 }
             }
         }
         std.fs.Dir.close(&dir);
     } else |err| {
-        if (err == error.NotDir) show_file(path);
+        if (err == error.NotDir) {
+            std.debug.assert(TABS == 0);
+            show_file(path);
+        }
         return;
     }
 }
@@ -197,7 +190,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             lsFlags.Help => {
-                warn("Usgae: ls FLAGS DIRECTORIES\n", .{});
+                warn("Usage: ls FLAGS DIRECTORIES\n", .{});
                 return 1;
             },
             lsFlags.All => {
