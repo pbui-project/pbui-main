@@ -17,6 +17,7 @@ const uniq = @import("uniq.zig");
 const shuf = @import("shuf.zig");
 const sha1 = @import("sha1.zig");
 const sort = @import("sort.zig");
+const pwd = @import("pwd.zig");
 const stdout = &std.io.getStdOut().outStream();
 const warn = std.debug.warn;
 const testing = std.testing;
@@ -44,6 +45,7 @@ pub fn usage(args: [][]u8) anyerror!u8 {
         \\shuf
         \\sha1
         \\sort
+        \\pwd
         \\
     , .{});
 
@@ -81,6 +83,7 @@ pub fn main() anyerror!u8 {
     _ = try func_map.put("shuf", shuf.main);
     _ = try func_map.put("sha1", sha1.main);
     _ = try func_map.put("sort", sort.main);
+    _ = try func_map.put("pwd", pwd.main);
 
     // check basename of exe
     var buffer: [100]u8 = undefined;
