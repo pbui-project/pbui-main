@@ -72,12 +72,12 @@ pub fn main(args: [][]u8) anyerror!u8 {
             try stdout.print("Error: cannot open file {}\n", .{name});
             return 1;
         };
-        lines = try shuf(file, time.milliTimestamp());
+        lines = try shuf(file, @intCast(u64, time.milliTimestamp()));
 
         file.close();
     } else {
         // stdin
-        lines = try shuf(std.io.getStdIn(), time.milliTimestamp());
+        lines = try shuf(std.io.getStdIn(), @intCast(u64, time.milliTimestamp()));
     }
     for (lines.items) |row| {
         warn("{}\n", .{row});

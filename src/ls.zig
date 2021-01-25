@@ -54,7 +54,7 @@ fn printTabs(tabn: usize) void {
 
 // Function to compare two words, regardless of case
 // Returning true means first word < second word, and vice versa
-pub fn compare_words(word1: []const u8, word2: []const u8) bool {
+pub fn compare_words(context: void, word1: []const u8, word2: []const u8) bool {
     var maxlen: usize = 0;
     var w: bool = false;
     var index: usize = 0;
@@ -110,7 +110,7 @@ pub fn alpha_ArrayList(oldList_: std.ArrayList(std.fs.Dir.Entry)) !void {
         var word: usize = oldList.items.len - 1;
 
         while (word > 0) {
-            if (compare_words(nextword, oldList.items[word].name) == false) {
+            if (compare_words(.{}, nextword, oldList.items[word].name) == false) {
                 nextword = oldList.items[word].name;
                 nextpos = word;
             }

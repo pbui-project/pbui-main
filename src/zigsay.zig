@@ -87,8 +87,8 @@ fn wrap(s: []u8, allocator: *std.mem.Allocator) ![][]u8 {
 
     // push words into line buffer, and line buffer into result list
     while (iterator < s.len) : (iterator += 1) {
-        if ((iterator + 1 == s.len and !std.fmt.isWhiteSpace(s[iterator])) or
-            (iterator + 1 < s.len and std.fmt.isWhiteSpace(s[iterator + 1])))
+        if ((iterator + 1 == s.len and !std.ascii.isSpace(s[iterator])) or
+            (iterator + 1 < s.len and std.ascii.isSpace(s[iterator + 1])))
         {
             if (word_start != iterator + 1) { // end of word, not a leading whitespace
                 if (line_buffer.items.len > 0 and line_buffer.items.len + (iterator - word_start + 2) > MAXLEN) {

@@ -17,7 +17,7 @@ pub fn sort(allocator: *Allocator, file: std.fs.File, options: PrintOptions) !st
         try lines.append(line);
     }
 
-    std.sort.sort([]const u8, lines.items[0..], comparator);
+    std.sort.sort([]const u8, lines.items[0..], {}, comparator);
 
     if (options == PrintOptions.Reverse) {
         var i: u32 = 0;

@@ -92,7 +92,7 @@ pub fn main() anyerror!u8 {
     var tes = try basename.basename(args[0], empty[0..], null, allocator);
 
     // check if basename is right
-    var yeet = func_map.getValue(tes) orelse null;
+    var yeet = func_map.get(tes) orelse null;
     if (yeet) |applet| {
         return applet(args[0..]);
     }
@@ -104,7 +104,7 @@ pub fn main() anyerror!u8 {
 
     var applet_name = args[1];
 
-    var ab = func_map.getValue(applet_name) orelse usage;
+    var ab = func_map.get(applet_name) orelse usage;
 
     return ab(args[1..]);
 }
