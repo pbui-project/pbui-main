@@ -1,5 +1,5 @@
 const std = @import("std");
-const Sha1 = std.crypto.Sha1;
+const Sha1 = std.crypto.hash.Sha1;
 const opt = @import("opt.zig");
 const Allocator = std.mem.Allocator;
 const stdout = &std.io.getStdOut().outStream();
@@ -7,7 +7,7 @@ const warn = std.debug.warn;
 const BUFSIZ = 4096;
 
 pub fn sha1(allocator: *Allocator, file: std.fs.File) ![40]u8 {
-    var h = Sha1.init();
+    var h = Sha1.init(.{});
     var hash: [20]u8 = undefined;
     var real_out: [40]u8 = undefined;
 
@@ -20,7 +20,6 @@ pub fn sha1(allocator: *Allocator, file: std.fs.File) ![40]u8 {
     while (size > 0) : (size = try file.readAll(&read_buffer)) {
         try file_buffer.insertSlice(file_buffer.items.len, read_buffer[0..size]);
     }
-    h.reset();
     h.update(file_buffer.items[0..]);
     h.final(hash[0..]);
     var i: u8 = 0;
