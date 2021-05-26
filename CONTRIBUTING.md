@@ -11,7 +11,7 @@ Thanks for considering to contribute to Pbui Project! We accept all kinds of con
 
 For cases of reporting bugs, discussing project state, or just asking general questions, you have two options:
 
-1. Reach out in the maintainer channel #pbui on Freenode
+1. Reach out in the maintainer channel #pbui on Libera
 
 2. [Create an issue](https://github.com/pbui-project/pbui-main/issues) on this repository.
 Please give as much detail as you can, especially when reporting bugs.
