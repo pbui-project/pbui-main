@@ -1,7 +1,7 @@
 const std = @import("std");
 const warn = std.debug.warn;
 const opt = @import("opt.zig");
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 
 pub fn dirname(paths: std.ArrayList([]u8), zero: bool) !void {
     // dirname calls dirnameposix if not windows... more robust
@@ -13,7 +13,7 @@ pub fn dirname(paths: std.ArrayList([]u8), zero: bool) !void {
     for (paths.items) |path| {
         name = std.fs.path.dirname(path) orelse ".";
 
-        try stdout.print("{}{c}", .{ name, terminator });
+        try stdout.print("{s}{c}", .{ name, terminator });
     }
 }
 

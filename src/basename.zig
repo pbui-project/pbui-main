@@ -1,7 +1,7 @@
 const std = @import("std");
 const opt = @import("opt.zig");
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const warn = std.debug.warn;
 
 pub fn basename(path: []const u8, terminator: []const u8, suffix: ?[]u8, allocator: *Allocator) ![]u8 {
@@ -101,20 +101,20 @@ pub fn main(args: [][]u8) anyerror!u8 {
         if (!multiple and suffix == null) {
             suffix = it.next_arg();
             if (it.next_arg()) |arg| {
-                warn("{}: extra operand '{}'\n", .{ args[0], arg });
-                warn("Try '{} --help' for more information.\n", .{args[0]});
+                warn("{s}: extra operand '{s}'\n", .{ args[0], arg });
+                warn("Try '{s} --help' for more information.\n", .{args[0]});
                 return 1;
             }
         }
-        try stdout.print("{}", .{basename(first, eolchar, suffix, allocator)});
+        try stdout.print("{s}", .{basename(first, eolchar, suffix, allocator)});
         if (multiple) {
             while (it.next_arg()) |arg| {
-                try stdout.print("{}", .{basename(arg, eolchar, suffix, allocator)});
+                try stdout.print("{s}", .{basename(arg, eolchar, suffix, allocator)});
             }
         }
     } else {
-        warn("{}: missing operand.\n", .{args[0]});
-        warn("Try '{} --help' for more information.\n", .{args[0]});
+        warn("{s}: missing operand.\n", .{args[0]});
+        warn("Try '{s} --help' for more information.\n", .{args[0]});
         return 1;
     }
 

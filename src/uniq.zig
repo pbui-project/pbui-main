@@ -2,7 +2,7 @@ const std = @import("std");
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 
 /// Print uniq adjacent lines... no flags yet
 pub fn uniq(file: std.fs.File, options: PrintOptions) !void {
@@ -25,10 +25,10 @@ pub fn uniq(file: std.fs.File, options: PrintOptions) !void {
         // if not equal check if should print
         if (!std.mem.eql(u8, old_line, line)) {
             switch (options) {
-                .Duplicate => if (matched > 0) warn("{}\n", .{old_line}),
-                .Unique => if (matched == 0) warn("{}\n", .{old_line}),
-                .Count => warn("{:>4} {}\n", .{ matched + 1, old_line }),
-                else => warn("{}\n", .{old_line}),
+                .Duplicate => if (matched > 0) warn("{s}\n", .{old_line}),
+                .Unique => if (matched == 0) warn("{s}\n", .{old_line}),
+                .Count => warn("{:>4} {s}\n", .{ matched + 1, old_line }),
+                else => warn("{s}\n", .{old_line}),
             }
             matched = 0;
         } else {
@@ -41,10 +41,10 @@ pub fn uniq(file: std.fs.File, options: PrintOptions) !void {
     }
 
     switch (options) {
-        .Duplicate => if (matched > 0) warn("{}\n", .{old_line}),
-        .Unique => if (matched == 0) warn("{}\n", .{old_line}),
-        .Count => warn("{:>4} {}\n", .{ matched + 1, old_line }),
-        else => warn("{}\n", .{old_line}),
+        .Duplicate => if (matched > 0) warn("{s}\n", .{old_line}),
+        .Unique => if (matched == 0) warn("{s}\n", .{old_line}),
+        .Count => warn("{:>4} {s}\n", .{ matched + 1, old_line }),
+        else => warn("{s}\n", .{old_line}),
     }
     std.heap.page_allocator.free(old_line);
 }
@@ -52,7 +52,7 @@ pub fn uniq(file: std.fs.File, options: PrintOptions) !void {
 /// Get a single line of file -- needs to be freed bor
 pub fn get_line(allocator: *Allocator, file: std.fs.File) ![]u8 {
     var char: u8 = undefined;
-    var stream = std.fs.File.inStream(file);
+    var stream = std.fs.File.reader(file);
     var i: u64 = 0;
 
     char = try stream.readByte(); // err if no stream
@@ -116,7 +116,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             UniqFlags.Help => {
-                warn("{} [-c | -d | -u ] [FILE_NAME]\n", .{args[0]});
+                warn("{s} [-c | -d | -u ] [FILE_NAME]\n", .{args[0]});
                 return 0;
             },
             UniqFlags.Version => {
@@ -139,7 +139,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
 
     if (input) |name| {
         const file = std.fs.cwd().openFile(name[0..], std.fs.File.OpenFlags{ .read = true, .write = false }) catch |err| {
-            try stdout.print("Error: cannot open file {}\n", .{name});
+            try stdout.print("Error: cannot open file {s}\n", .{name});
             return 1;
         };
         try uniq(file, options);

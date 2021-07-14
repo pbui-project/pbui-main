@@ -1,7 +1,7 @@
 const std = @import("std");
 const opt = @import("opt.zig");
 const File = std.fs.File;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const warn = std.debug.warn;
 const BUFSIZ: u16 = 4096;
 
@@ -25,7 +25,7 @@ pub fn tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     };
 
     // print file from start pos
-    var in_stream = std.fs.File.inStream(file);
+    var in_stream = std.fs.File.reader(file);
     print_stream(&in_stream) catch |err| {
         try stdout.print("Error: cannot print file: {}\n", .{err});
         return;
@@ -52,7 +52,7 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
     var first_time: bool = true;
 
     // add lines to buffer
-    while (file.inStream().readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
+    while (file.reader().readUntilDelimiterOrEof(lineBuf[0..], '\n')) |segment| {
         if (segment == null) break;
         // dealloc if already exist
         if (!first_time) allocator.free(lines[i]);
@@ -74,7 +74,7 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
         while ((i == 0 or x != top) and i <= new_n) : (x += 1) {
             // loop buffer location around
             if (x >= new_n) x = 0;
-            try stdout.print("{}\n", .{lines[x]});
+            try stdout.print("{s}\n", .{lines[x]});
             i += 1;
         }
     } else {
@@ -96,7 +96,7 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
         while (x != top) : (x += 1) {
             if (x >= new_n) x = 0;
             if (!first_time and x > top) break;
-            try stdout.print("{}\n", .{lines[x][start_pos..]});
+            try stdout.print("{s}\n", .{lines[x][start_pos..]});
             start_pos = 0;
         }
     }
@@ -104,20 +104,20 @@ pub fn alt_tail(n: u32, file: std.fs.File, is_bytes: bool) !void {
 
 // Prints stream from current pointer to end of file in BUFSIZ
 // chunks.
-pub fn print_stream(stream: *std.fs.File.InStream) anyerror!void {
+pub fn print_stream(stream: *std.fs.File.Reader) anyerror!void {
     var buffer: [BUFSIZ]u8 = undefined;
     var size = try stream.readAll(&buffer);
 
     // loop until EOF hit
     while (size > 0) : (size = (try stream.readAll(&buffer))) {
-        try stdout.print("{}", .{buffer[0..size]});
+        try stdout.print("{s}", .{buffer[0..size]});
     }
 }
 
 pub fn find_adjusted_start(n: u32, file: std.fs.File, is_bytes: bool) anyerror!u64 {
     // Create streams for file access
     var seekable = std.fs.File.seekableStream(file);
-    var in_stream = std.fs.File.inStream(file);
+    var in_stream = std.fs.File.reader(file);
 
     // Find ending position of file
     var endPos: u64 = seekable.getEndPos() catch |err| {
@@ -240,10 +240,10 @@ pub fn main(args: [][]u8) anyerror!u8 {
     if (files.items.len > 0) {
         for (files.items) |file_name| {
             const file = std.fs.cwd().openFile(file_name[0..], File.OpenFlags{ .read = true, .write = false }) catch |err| {
-                try stdout.print("Error: cannot open file {}\n", .{file_name});
+                try stdout.print("Error: cannot open file {s}\n", .{file_name});
                 return 1;
             };
-            if (files.items.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
+            if (files.items.len >= 2) try stdout.print("==> {s} <==\n", .{file_name});
             try tail(n, file, opts == PrintOptions.Bytes);
             file.close();
         }

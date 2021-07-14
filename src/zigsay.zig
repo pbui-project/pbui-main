@@ -1,7 +1,7 @@
 const std = @import("std");
 const opt = @import("opt.zig");
-const stdout = &std.io.getStdOut().outStream();
-const stdin = &std.io.getStdIn().inStream();
+const stdout = &std.io.getStdOut().writer();
+const stdin = &std.io.getStdIn().reader();
 
 const VERSION = "0.0.1";
 
@@ -162,7 +162,7 @@ fn print_dialog_box(lines: [][]u8, allocator: *std.mem.Allocator) !void {
             end_char = '/';
         }
 
-        try stdout.print("{c} {} ", .{ start_char, line });
+        try stdout.print("{c} {s} ", .{ start_char, line });
         if (line.len < max_len)
             try print_repeat(' ', max_len - line.len, false, allocator);
         try stdout.print("{c}\n", .{end_char});
@@ -197,7 +197,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
                 return 0;
             },
             ZigsayFlags.Version => {
-                std.debug.warn("version: {}\n", .{VERSION});
+                std.debug.warn("version: {s}\n", .{VERSION});
                 return 0;
             },
         }

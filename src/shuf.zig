@@ -2,7 +2,7 @@ const std = @import("std");
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const rand = std.rand.DefaultPrng; // fast unbiased random numbers
 const time = std.time;
 
@@ -14,7 +14,7 @@ pub fn shuf(file: std.fs.File, seed: u64) !std.ArrayList([]u8) {
 
     while (true) {
         // gross stuff pls pr and make this nice
-        line = file.inStream().readUntilDelimiterAlloc(std.heap.page_allocator, '\n', std.math.maxInt(u32)) catch break;
+        line = file.reader().readUntilDelimiterAlloc(std.heap.page_allocator, '\n', std.math.maxInt(u32)) catch break;
 
         try lines.append(line);
     }
@@ -53,7 +53,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             ShufFlags.Help => {
-                warn("{} [FILE_NAME]\n", .{args[0]});
+                warn("{s} [FILE_NAME]\n", .{args[0]});
                 return 0;
             },
             ShufFlags.Version => {
@@ -69,7 +69,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
 
     if (input) |name| {
         const file = std.fs.cwd().openFile(name[0..], std.fs.File.OpenFlags{ .read = true, .write = false }) catch |err| {
-            try stdout.print("Error: cannot open file {}\n", .{name});
+            try stdout.print("Error: cannot open file {s}\n", .{name});
             return 1;
         };
         lines = try shuf(file, @intCast(u64, time.milliTimestamp()));
@@ -80,7 +80,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
         lines = try shuf(std.io.getStdIn(), @intCast(u64, time.milliTimestamp()));
     }
     for (lines.items) |row| {
-        warn("{}\n", .{row});
+        warn("{s}\n", .{row});
         std.heap.page_allocator.free(row);
     }
     lines.deinit();

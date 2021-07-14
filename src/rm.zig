@@ -1,5 +1,5 @@
 const std = @import("std");
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 
 pub fn remove(name: []const u8) !void {
     std.fs.cwd().deleteTree(name) catch |err| {
