@@ -127,8 +127,8 @@ pub fn FlagIterator(comptime T: type) type {
             if (opt_flag) |flag| {
                 if (flag.kind == ArgType.None) {
                     if (eqindex != curr.len) {
-                        warn("{}: option '{}' doesn't allow an argument\n", .{ self.argv[0], curr[0..eqindex] });
-                        warn("Try '{} --help' for more information.\n", .{self.argv[0]});
+                        warn("{s}: option '{s}' doesn't allow an argument\n", .{ self.argv[0], curr[0..eqindex] });
+                        warn("Try '{s} --help' for more information.\n", .{self.argv[0]});
                         return error.InvalidFlagArgument;
                     }
                     self.count += 1;
@@ -146,16 +146,16 @@ pub fn FlagIterator(comptime T: type) type {
                 }
                 // If mandatory, return next string
                 if (self.count == self.argv.len - 1) {
-                    warn("{}: option '{}' requires an argument.\n", .{ self.argv[0], curr[0..] });
-                    warn("Try '{} --help' for more information.\n", .{self.argv[0]});
+                    warn("{s}: option '{s}' requires an argument.\n", .{ self.argv[0], curr[0..] });
+                    warn("Try '{s} --help' for more information.\n", .{self.argv[0]});
                     return error.MissingFlagArgument;
                 }
                 self.count += 2;
                 return FlagValue(T){ .name = flag.name, .value = ArgType{ .String = self.argv[self.count - 1] } };
             } else {
                 // Error, invalid flag
-                warn("{}: unrecognized option '{}'\n", .{ self.argv[0], curr[0..eqindex] });
-                warn("Try '{} --help' for more information.\n", .{self.argv[0]});
+                warn("{s}: unrecognized option '{s}'\n", .{ self.argv[0], curr[0..eqindex] });
+                warn("Try '{s} --help' for more information.\n", .{self.argv[0]});
                 return error.InvalidFlag;
             }
         }
@@ -190,8 +190,8 @@ pub fn FlagIterator(comptime T: type) type {
                             };
                         } else {
                             // Error, missing argument
-                            warn("{}: option requires an argument -- '{}'\n", .{ self.argv[0], curr[oldpos .. oldpos + 1] });
-                            warn("Try '{} --help' for more information.\n", .{self.argv[0]});
+                            warn("{s}: option requires an argument -- '{s}'\n", .{ self.argv[0], curr[oldpos .. oldpos + 1] });
+                            warn("Try '{s} --help' for more information.\n", .{self.argv[0]});
                             return error.MissingFlagArgument;
                         }
                     }
@@ -208,8 +208,8 @@ pub fn FlagIterator(comptime T: type) type {
                 };
             } else {
                 // Error, invalid flag
-                warn("{}: invalid option -- '{}'\n", .{ self.argv[0], curr[self.pos .. self.pos + 1] });
-                warn("Try '{} --help' for more information.\n", .{self.argv[0]});
+                warn("{s}: invalid option -- '{s}'\n", .{ self.argv[0], curr[self.pos .. self.pos + 1] });
+                warn("Try '{s} --help' for more information.\n", .{self.argv[0]});
                 return error.InvalidFlag;
             }
         }

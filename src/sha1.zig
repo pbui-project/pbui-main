@@ -2,7 +2,7 @@ const std = @import("std");
 const Sha1 = std.crypto.hash.Sha1;
 const opt = @import("opt.zig");
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const warn = std.debug.warn;
 const BUFSIZ = 4096;
 
@@ -75,7 +75,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     if (files.items.len > 0) {
         for (files.items) |file_name| {
             const file = std.fs.cwd().openFile(file_name[0..], std.fs.File.OpenFlags{ .read = true, .write = false }) catch |err| {
-                try stdout.print("Error: cannot open file {}\n", .{file_name});
+                try stdout.print("Error: cannot open file {s}\n", .{file_name});
                 return 1;
             };
             // run command
@@ -83,7 +83,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
                 try stdout.print("Error: {}\n", .{err});
                 return 1;
             };
-            try stdout.print("{}\n", .{result});
+            try stdout.print("{s}\n", .{result});
             file.close();
         }
     } else {
@@ -91,7 +91,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
             try stdout.print("Error: {}\n", .{err});
             return 1;
         };
-        try stdout.print("{}\n", .{result});
+        try stdout.print("{s}\n", .{result});
     }
     return 0;
 }

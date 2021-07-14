@@ -2,7 +2,7 @@
 // nap time bb
 
 const std = @import("std");
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 
 pub fn sleep(n: u32) anyerror!void {
     // TODO: docs say maybe spurious wakeups but no way to tell.. possible PR or issue maybe?

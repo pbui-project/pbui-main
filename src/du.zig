@@ -2,7 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const Allocator = std.mem.Allocator;
 
 const fstaterror = std.os.FStatError;
@@ -32,26 +32,26 @@ pub fn du(paths: std.ArrayList([]const u8), depth: u8, sz: SizeOptions) anyerror
                 }
                 //try stdout.print("calling du\n", .{});
                 size = try du(files, depth + 1, sz);
-                try stdout.print("{}\t{}{c}", .{ size / divisor / 8, file_name, terminator });
+                try stdout.print("{d}\t{s}{c}", .{ size / divisor / 8, file_name, terminator });
                 total_size += size;
                 var opened = dir;
                 std.fs.Dir.close(&opened);
             } else |erro| {
-                //try stdout.print("not folder: {}\n", .{file_name});
+                //try stdout.print("not folder: {s}\n", .{file_name});
                 f = std.fs.cwd().openFile(file_name, .{
                     .read = true,
                     .write = false,
                 }) catch |err| {
-                    try stdout.print("Error opening file: {}! {}\n", .{ file_name, err });
+                    try stdout.print("Error opening file: {s}! {}\n", .{ file_name, err });
                     return err;
                 };
                 size = grab_allocated_memory(f) catch |err| {
-                    try stdout.print("Error statting file: {}!\n", .{file_name});
+                    try stdout.print("Error statting file: {s}!\n", .{file_name});
                     return err;
                 };
                 f.close();
                 // assume 512 byte blocks unless environmental variable set
-                if (depth == 0) try stdout.print("{}\t{}{c}", .{ size / divisor / 8, file_name, terminator });
+                if (depth == 0) try stdout.print("{d}\t{s}{c}", .{ size / divisor / 8, file_name, terminator });
                 total_size += size;
             }
         }

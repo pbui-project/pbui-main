@@ -2,7 +2,7 @@ const std = @import("std");
 const opt = @import("opt.zig");
 
 const warn = std.debug.warn;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const BUFSIZ: u16 = 4096;
 
 
@@ -62,11 +62,11 @@ pub fn main(args: [][]u8) anyerror!u8 {
 
     // send pwd to stdout
     if(phys){ //physical pwd
-        var buffer: [1024]u8 = undefined;
+        var buffer: [BUFSIZ]u8 = undefined;
         var phys_pwd = try std.os.realpath(pwd.?, &buffer);
-        try stdout.print("{}\n", .{phys_pwd});
+        try stdout.print("{s}\n", .{phys_pwd});
     }else{ //logical pwd
-        try stdout.print("{}\n", .{pwd});
+        try stdout.print("{s}\n", .{pwd});
     }
 
 

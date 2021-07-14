@@ -1,6 +1,6 @@
 const std = @import("std");
 const File = std.fs.File;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 const opt = @import("opt.zig");
 const warn = std.debug.warn;
 
@@ -35,25 +35,25 @@ pub fn head(n: u32, file: std.fs.File, is_stdin: bool, is_bytes: bool) !void {
         if (is_bytes) {
             if (size + bytes_read > n) {
                 var left = n - bytes_read;
-                try stdout.print("{}", .{buffer[0..left]});
+                try stdout.print("{s}", .{buffer[0..left]});
                 bytes_read += size;
             } else {
                 bytes_read += size;
-                try stdout.print("{}", .{buffer[0..size]});
+                try stdout.print("{s}", .{buffer[0..size]});
             }
             continue;
         }
         // search for \n over characters and dump lines when found
         while (fast < size) : (fast += 1) {
             if (buffer[fast] == '\n') {
-                try stdout.print("{}\n", .{buffer[slow..fast]});
+                try stdout.print("{s}\n", .{buffer[slow..fast]});
                 slow = fast + 1;
                 line_count += 1;
                 if (line_count >= n) return;
             }
         }
         // print leftover
-        try stdout.print("{}", .{buffer[slow..fast]});
+        try stdout.print("{s}", .{buffer[slow..fast]});
     }
 }
 
@@ -143,10 +143,10 @@ pub fn main(args: [][]u8) anyerror!u8 {
                 .read = true,
                 .write = false,
             }) catch |err| {
-                try stdout.print("Error: cannot open file {}\n", .{file_name});
+                try stdout.print("Error: cannot open file {s}\n", .{file_name});
                 return 1;
             };
-            if (files.items.len >= 2) try stdout.print("==> {} <==\n", .{file_name});
+            if (files.items.len >= 2) try stdout.print("==> {s} <==\n", .{file_name});
             // run command
             head(n, file, false, opts == PrintOptions.Bytes) catch |err| {
                 try stdout.print("Error: {}\n", .{err});

@@ -1,6 +1,6 @@
 const std = @import("std");
 const File = std.fs.file;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 
 const BUFSIZ: u16 = 4096;
 
@@ -37,7 +37,7 @@ pub fn wc(path: []const u8) !void {
             // increments characters
             character_count += 1;
         }
-        try stdout.print("  {} {} {}", .{ line_count, character_count, path });
+        try stdout.print("  {d} {d} {s}", .{ line_count, character_count, path });
     }
 }
 

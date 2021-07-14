@@ -3,7 +3,7 @@ const opt = @import("opt.zig");
 const comparator = @import("ls.zig").compare_words;
 const warn = std.debug.warn;
 const Allocator = std.mem.Allocator;
-const stdout = &std.io.getStdOut().outStream();
+const stdout = &std.io.getStdOut().writer();
 
 /// memory belongs to caller
 pub fn sort(allocator: *Allocator, file: std.fs.File, options: PrintOptions) !std.ArrayList([]u8) {
@@ -34,7 +34,7 @@ pub fn sort(allocator: *Allocator, file: std.fs.File, options: PrintOptions) !st
 /// Get a single line of file -- needs to be freed bor
 pub fn get_line(allocator: *Allocator, file: std.fs.File) ![]u8 {
     var char: u8 = undefined;
-    var stream = std.fs.File.inStream(file);
+    var stream = std.fs.File.reader(file);
     var i: u64 = 0;
 
     char = try stream.readByte(); // err if no stream
@@ -86,7 +86,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     }) |flag| {
         switch (flag.name) {
             SortFlags.Help => {
-                warn("{} [-r] [FILE_NAME]\n", .{args[0]});
+                warn("{s} [-r] [FILE_NAME]\n", .{args[0]});
                 return 0;
             },
             SortFlags.Version => {
@@ -103,7 +103,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     var lines: std.ArrayList([]u8) = undefined;
     if (input) |name| {
         const file = std.fs.cwd().openFile(name[0..], std.fs.File.OpenFlags{ .read = true, .write = false }) catch |err| {
-            try stdout.print("Error: cannot open file {}\n", .{name});
+            try stdout.print("Error: cannot open file {s}\n", .{name});
             return 1;
         };
         lines = try sort(std.heap.page_allocator, file, options);
@@ -113,7 +113,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
         lines = try sort(std.heap.page_allocator, std.io.getStdIn(), options);
     }
     for (lines.items) |line| {
-        warn("{}\n", .{line});
+        warn("{s}\n", .{line});
         std.heap.page_allocator.free(line);
     }
     lines.deinit();

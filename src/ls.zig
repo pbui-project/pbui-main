@@ -40,7 +40,7 @@ var flags = [_]opt.Flag(lsFlags){
 // Function for displaying just a filename
 fn show_file(path: []const u8) void {
     printTabs(TABS);
-    warn("{}\n", .{path});
+    warn("{s}\n", .{path});
 }
 
 // Function to print the tabs utilized in recursive ls
@@ -214,7 +214,7 @@ pub fn main(args: [][]u8) anyerror!u8 {
     if (dirs.items.len > 0) {
         for (dirs.items) |arg, i| {
             if (dirs.items.len > 1) {
-                warn("{}:\n", .{arg});
+                warn("{s}:\n", .{arg});
             }
             const result = show_directory(arg);
             if (dirs.items.len != i + 1) {
